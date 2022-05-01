@@ -1,0 +1,28 @@
+{
+  "bases": [
+    {
+      "name": "The yellow base",
+      "team": [
+        "Skyfy16"
+      ],
+      "square": {
+        "size": 9,
+        "x": 20,
+        "y": 60,
+        "z": 20
+      }
+    },
+    {
+      "name": "The green base",
+      "team": [
+        "Alex"
+      ],
+      "square": {
+        "size": 9,
+        "x": -20,
+        "y": 60,
+        "z": -20
+      }
+    }
+  ]
+}
