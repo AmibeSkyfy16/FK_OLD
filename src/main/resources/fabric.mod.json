@@ -10,9 +10,9 @@
   "contact": {},
   "license": "MIT",
   "icon": "assets/fk/icon.png",
-  "environment": "*",
+  "environment": "server",
   "entrypoints": {
-    "main": [
+    "server": [
       "ch.skyfy.fk.FK"
     ]
   },

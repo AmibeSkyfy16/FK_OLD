@@ -2,6 +2,7 @@ package ch.skyfy.fk.commands;
 
 import ch.skyfy.fk.logic.FKGame;
 import ch.skyfy.fk.logic.GameUtils;
+import ch.skyfy.fk.logic.PreFKGame;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
@@ -11,7 +12,6 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 
 public class StartCmd implements Command<ServerCommandSource> {
-
 
     public StartCmd() {
 

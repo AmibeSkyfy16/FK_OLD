@@ -4,6 +4,9 @@
   "package": "ch.skyfy.fk.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+
+  ],
+  "server": [
     "EntityMixin",
     "LivingEntityMixin",
     "PlayerEntityMixin",

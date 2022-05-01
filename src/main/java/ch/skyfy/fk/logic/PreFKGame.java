@@ -26,6 +26,7 @@ public class PreFKGame {
 
     @SuppressWarnings("ConstantConditions")
     private void teleportPlayerToWaitingRoom(ServerPlayerEntity player, MinecraftServer server) {
+        if (GAME_STATE != FK.GameState.NOT_STARTED) return;
         var spawnLoc = Configs.FK_CONFIG.config.waitingRoom.getSpawnLocation();
         StreamSupport.stream(server.getWorlds().spliterator(), false)
                 .filter(serverWorld -> serverWorld.getDimension().getEffects().toString().equals(spawnLoc.getDimensionName()))
@@ -45,6 +46,8 @@ public class PreFKGame {
      * Prevents the player from leaving the waiting room
      */
     private ActionResult onPlayerMove(PlayerMoveCallback.MoveData moveData, ServerPlayerEntity player) {
+
+        if (GAME_STATE != FK.GameState.NOT_STARTED)return ActionResult.SUCCESS;
 
         var waitingRoom = Configs.FK_CONFIG.config.waitingRoom;
         var square = waitingRoom.getSquare();

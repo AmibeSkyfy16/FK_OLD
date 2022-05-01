@@ -5,12 +5,12 @@ import ch.skyfy.fk.commands.StartCmd;
 import ch.skyfy.fk.config.Configs;
 import ch.skyfy.fk.config.core.BetterConfig;
 import ch.skyfy.fk.logic.PreFKGame;
-import net.fabricmc.api.ModInitializer;
+import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class FK implements ModInitializer {
+public class FK implements DedicatedServerModInitializer {
 
     public enum GameState {
         NOT_STARTED,
@@ -31,7 +31,7 @@ public class FK implements ModInitializer {
     }
 
     @Override
-    public void onInitialize() {
+    public void onInitializeServer() {
         if (BetterConfig.initialize(new Class[]{Configs.class})) return;
 
         preFKGame.registerAll();
