@@ -17,10 +17,9 @@ public class FKGame {
 
     public Timeline timeline;
 
-
     public FKGame(MinecraftServer server) {
         this.server = server;
-        this.timeline = new Timeline();
+        this.timeline = new Timeline(server);
 
         TestUtils.printVersion(com.google.gson.Gson.class);
     }
@@ -30,70 +29,42 @@ public class FKGame {
     public void start() {
         System.out.println("the game is started");
 
+        server.getOverworld().setTimeOfDay(0);
+        var timeOfDay = server.getOverworld().getTimeOfDay();
+        System.out.println("time of day is: " + timeOfDay);
+
         timeline.startTimer();
 
-//        var serverScoreBoard = server.getScoreboard();
-//        var scoreBoardCriterionOpt = ScoreboardCriterion.getOrCreateStatCriterion("time");
-//        var scoreboardCriterion = scoreBoardCriterionOpt.get();
-//        serverScoreBoard.addObjective("FK", scoreboardCriterion, Text.of("FK dn"), ScoreboardCriterion.RenderType.INTEGER);
 
         var player = server.getPlayerManager().getPlayer("Skyfy16");
-//
-//        Scoreboard playerScoreboard = player.getScoreboard();
-//
-//        playerScoreboard.addObjective("general", ScoreboardCriterion.DUMMY, Text.of("FK display"), ScoreboardCriterion.RenderType.INTEGER);
-//        var objective2 = playerScoreboard.getObjective("general");
-//
-//
-//        ScoreboardPlayerScore scoreboardPlayerScore1 = new ScoreboardPlayerScore(playerScoreboard, objective2, "Skyfy16");
-//        scoreboardPlayerScore1.setScore(12212);
-//
-//        playerScoreboard.setObjectiveSlot(2, objective2); // 2 is sidebar
 
 
-        // Another try
-
-//        Scoreboard scoreboard = player.getScoreboard();
-////        ScoreboardObjective objective = new ScoreboardObjective(scoreboard, "FK", ScoreboardCriterion.DUMMY, Text.of("FK display"), ScoreboardCriterion.RenderType.INTEGER);
-////        ScoreboardPlayerScore scoreboardPlayerScore = new ScoreboardPlayerScore(scoreboard, objective, "Skyfy16");
-////        scoreboardPlayerScore.setScore(179);
+//        Scoreboard scoreboard = player.getScoreboard(); // Get the player scoreboard
+//        scoreboard.addObjective("FK", ScoreboardCriterion.DUMMY, Text.of("<< Fallen Kingdoms >>"), ScoreboardCriterion.RenderType.INTEGER); // adding objective
+//        var objective = scoreboard.getObjective("FK");
 //
-//        scoreboard.addObjective("FK2", ScoreboardCriterion.DUMMY, Text.of("FK display2"), ScoreboardCriterion.RenderType.INTEGER);
-//        ScoreboardObjective objective = scoreboard.getObjective("FK2");
+//        ScoreboardPlayerScore scoreboardPlayerScore = new ScoreboardPlayerScore(scoreboard, objective, "time 1"); // create a score
+//        scoreboardPlayerScore.setScore(111111);
 //
-//        ScoreboardPlayerScore scoreboardPlayerScore = new ScoreboardPlayerScore(scoreboard, objective, "Skyfy16");
-//        scoreboardPlayerScore.setScore(179);
+//        ScoreboardPlayerScore scoreboardPlayerScore2 = new ScoreboardPlayerScore(scoreboard, objective, "time 2"); // create a score
+//        scoreboardPlayerScore2.setScore(999999);
+//
+//        ScoreboardPlayerScore scoreboardPlayerScore3 = new ScoreboardPlayerScore(scoreboard, objective, "time 555"); // create a score
+//        scoreboardPlayerScore2.setScore(0);
 //
 //        scoreboard.setObjectiveSlot(Scoreboard.SIDEBAR_DISPLAY_SLOT_ID, objective);
 //
+//        scoreboard.updateObjective(objective);
+//        scoreboard.updateScore(scoreboardPlayerScore);
+//        scoreboard.updateScore(scoreboardPlayerScore2);
+//        scoreboard.updateScore(scoreboardPlayerScore3);
 //
-//        server.getScoreboard().updateScore(scoreboardPlayerScore);
-//        server.getScoreboard().updatePlayerScore("Skyfy16");
-//        server.getScoreboard().updateObjective(objective);
-//
-//        player.getScoreboard().updateScore(scoreboardPlayerScore);
-//        player.getScoreboard().updatePlayerScore("Skyfy16");
-//        player.getScoreboard().updateObjective(objective);
-//
-//        player.getScoreboard().updateExistingObjective(player.getScoreboard().getObjective("FK2"));
+//        player.networkHandler.sendPacket(new ScoreboardObjectiveUpdateS2CPacket(objective, 2));
+//        player.networkHandler.sendPacket(new ScoreboardPlayerUpdateS2CPacket(ServerScoreboard.UpdateMode.CHANGE, "FK", "Skyfy16", 1212));
 
-
-        // Create a scoreboard another try
-
-        Scoreboard scoreboard = player.getScoreboard(); // Get the player scoreboard
-        scoreboard.addObjective("FK2", ScoreboardCriterion.DUMMY, Text.of("FK display2"), ScoreboardCriterion.RenderType.INTEGER); // adding objective
-        var objective = scoreboard.getObjective("FK2");
-        ScoreboardPlayerScore scoreboardPlayerScore = new ScoreboardPlayerScore(scoreboard, objective, "Skyfy16"); // create a score
-        scoreboardPlayerScore.setScore(1212121);
-
-        scoreboard.setObjectiveSlot(Scoreboard.SIDEBAR_DISPLAY_SLOT_ID, objective);
-
-        scoreboard.updateObjective(objective);
-        scoreboard.updateExistingObjective(objective);
-
-        player.networkHandler.sendPacket(new ScoreboardObjectiveUpdateS2CPacket(objective, 2));
-        player.networkHandler.sendPacket(new ScoreboardPlayerUpdateS2CPacket(ServerScoreboard.UpdateMode.CHANGE, "FK2", "Skyfy16", 1212));
-
+//        anotherScoreboard(player, "info1", Scoreboard.SIDEBAR_DISPLAY_SLOT_ID, 0);
+//        anotherScoreboard(player, "info2", Scoreboard.SIDEBAR_DISPLAY_SLOT_ID, 0);
+//        anotherScoreboard(player, "info3", Scoreboard.SIDEBAR_DISPLAY_SLOT_ID, 0);
 
         FK.GAME_STATE = FK.GameState.RUNNING;
         var fkPlayers = GameUtils.getFkPlayers(server);
@@ -103,5 +74,30 @@ public class FKGame {
         }
 
     }
+
+    private void anotherScoreboard(ServerPlayerEntity player, String name, int slot, int mode){
+        Scoreboard scoreboard = player.getScoreboard(); // Get the player scoreboard
+        scoreboard.addObjective(name, ScoreboardCriterion.DUMMY, Text.of("<< INFO >>"), ScoreboardCriterion.RenderType.INTEGER); // adding objective
+        var objective = scoreboard.getObjective(name);
+
+        ScoreboardPlayerScore scoreboardPlayerScore = new ScoreboardPlayerScore(scoreboard, objective, "time 1"); // create a score
+        scoreboardPlayerScore.setScore(111111);
+
+        ScoreboardPlayerScore scoreboardPlayerScore2 = new ScoreboardPlayerScore(scoreboard, objective, "time 2"); // create a score
+        scoreboardPlayerScore2.setScore(999999);
+
+        ScoreboardPlayerScore scoreboardPlayerScore3 = new ScoreboardPlayerScore(scoreboard, objective, "time 555"); // create a score
+        scoreboardPlayerScore3.setScore(0);
+
+        scoreboard.setObjectiveSlot(slot, objective);
+
+        scoreboard.updateObjective(objective);
+        scoreboard.updateScore(scoreboardPlayerScore);
+        scoreboard.updateScore(scoreboardPlayerScore2);
+        scoreboard.updateScore(scoreboardPlayerScore3);
+
+        player.networkHandler.sendPacket(new ScoreboardObjectiveUpdateS2CPacket(objective, mode));
+    }
+
 
 }
