@@ -30,12 +30,6 @@ public class ServerPlayNetworkHandlerMixin {
     @Shadow
     private double updatedZ;
 
-//    @Inject(at = @At("HEAD"), method = "onPlayerMove", cancellable = true)
-//    public void onPlayerMove(PlayerMoveC2SPacket playerMoveC2SPacket, CallbackInfo callbackInfo){
-//        callbackInfo.cancel();
-////        System.out.println("moved");
-//    }
-
     @Inject(
             method = "onPlayerMove(Lnet/minecraft/network/packet/c2s/play/PlayerMoveC2SPacket;)V",
             at = @At(
