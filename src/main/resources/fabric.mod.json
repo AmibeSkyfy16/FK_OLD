@@ -14,10 +14,14 @@
   "entrypoints": {
     "server": [
       "ch.skyfy.fk.FK"
+    ],
+    "main": [
+      "ch.skyfy.fk.sidebar.SidebarAPIMod"
     ]
   },
   "mixins": [
-    "fk.mixins.json"
+    "fk.mixins.json",
+    "sidebarapi.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.13.3",

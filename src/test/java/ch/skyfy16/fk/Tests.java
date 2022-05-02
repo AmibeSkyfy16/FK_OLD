@@ -7,11 +7,14 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Tests {
 
@@ -70,6 +73,27 @@ public class Tests {
         }catch (IOException e){
             e.printStackTrace();
         }
+    }
+
+    @ParameterizedTest
+    @ValueSource(longs = {600, 1000, 1200, 1452, 4200, 82100})
+    public void convertTick(long timeInTick){
+
+        var min = (int)(timeInTick / 1200d);
+        var sec = (int)(((timeInTick / 1200d) - min)*60);
+
+        System.out.println("timeInTick: " + timeInTick);
+        System.out.println("min: " + min);
+        System.out.println("sec: " + sec);
+
+        System.out.println("\n");
+    }
+
+    @Test
+    public void AtomicTest(){
+        var at = new AtomicReference<Short>((short)0);
+        at.set((short) (at.get() + 1));
+        System.out.println(at.get());
     }
 
 }

@@ -2,12 +2,15 @@ package ch.skyfy.fk.logic;
 
 import ch.skyfy.fk.FK;
 import ch.skyfy.fk.ScoreboardManager;
+import ch.skyfy.fk.commands.StartCmd;
 import ch.skyfy.fk.config.Configs;
 import ch.skyfy.fk.events.PlayerDamageCallback;
 import ch.skyfy.fk.events.PlayerMoveCallback;
 import me.bymartrixx.playerevents.api.event.PlayerJoinCallback;
+import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
@@ -20,10 +23,25 @@ import static ch.skyfy.fk.FK.GAME_STATE;
 @SuppressWarnings("ConstantConditions")
 public class PreFKGame {
 
+    private final StartCmd startCmd;
+
+    public PreFKGame() {
+        this.startCmd = new StartCmd(this);
+    }
+
     public void registerAll() {
+
+        registerCommands();
+
         PlayerJoinCallback.EVENT.register(this::teleportPlayerToWaitingRoom);
         PlayerDamageCallback.EVENT.register(this::onPlayerDamage);
         PlayerMoveCallback.EVENT.register(this::onPlayerMove);
+    }
+
+    private void registerCommands(){
+        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
+            dispatcher.register(CommandManager.literal("start").executes(startCmd));
+        });
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -39,7 +57,7 @@ public class PreFKGame {
                     if(!GameUtils.isFKPlayer(server.getPlayerManager().getPlayerList(), player.getName().asString())) return;
 
                     updateTeam(server, player);
-                    ScoreboardManager.getInstance().updateScoreboard(player);
+                    ScoreboardManager.getInstance().updateSidebar(player, 0, 0, 0);
 
                     player.teleport(serverWorld, spawnLoc.getX(), spawnLoc.getY(), spawnLoc.getZ(), spawnLoc.getYaw(), spawnLoc.getPitch());
                 });
@@ -67,8 +85,6 @@ public class PreFKGame {
         serverScoreboard.updateScoreboardTeam(team);
 
     }
-
-
 
     private ActionResult onPlayerDamage(DamageSource source, float amount) {
         if (GAME_STATE != FK.GameState.NOT_STARTED) return ActionResult.SUCCESS;

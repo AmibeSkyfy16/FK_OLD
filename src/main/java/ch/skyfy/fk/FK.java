@@ -33,15 +33,7 @@ public class FK implements DedicatedServerModInitializer {
     @Override
     public void onInitializeServer() {
         if (BetterConfig.initialize(new Class[]{Configs.class})) return;
-
         preFKGame.registerAll();
-        registerCommands();
-    }
-
-    private void registerCommands() {
-        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
-            if (dedicated) StartCmd.register(dispatcher);
-        });
     }
 
 }
