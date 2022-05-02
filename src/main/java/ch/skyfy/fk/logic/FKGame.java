@@ -4,10 +4,7 @@ import ch.skyfy.fk.FK;
 import ch.skyfy.fk.config.Configs;
 import ch.skyfy.fk.config.data.FKTeam;
 import ch.skyfy.fk.config.data.Square;
-import ch.skyfy.fk.events.EntityMoveCallback;
-import ch.skyfy.fk.events.PlayerDamageCallback;
-import ch.skyfy.fk.events.PlayerMoveCallback;
-import ch.skyfy.fk.events.TimeOfDayUpdatedCallback;
+import ch.skyfy.fk.events.*;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
@@ -18,6 +15,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.MovementType;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.LavaFluid;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.server.MinecraftServer;
@@ -27,6 +25,7 @@ import net.minecraft.text.Style;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
+import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -35,7 +34,6 @@ import net.minecraft.world.World;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static ch.skyfy.fk.FK.GAME_STATE;
 
@@ -88,17 +86,105 @@ public class FKGame {
     private void registerEvents() {
 
         PlayerBlockBreakEvents.BEFORE.register(runningEvents::cancelPlayerFromBreakingBlocks);
+        UseBlockCallback.EVENT.register(runningEvents::cancelPlayerFromPlacingBlocks);
 
-        UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
+        BucketFillEvent.EVENT.register((world, player, hand, fillFluid, bucketItem) -> {
+            var stack = player.getStackInHand(player.getActiveHand());
+            System.out.println("sa marche");
 
-            if(player.getStackInHand(player.getActiveHand()).isOf(Items.DIRT)){
-                System.out.println("player.getStackInHand(player.getActiveHand()).isOf(Items.DIRT)");
-                return ActionResult.FAIL;
+            if(fillFluid instanceof LavaFluid){
+                System.out.println("LavaFluid -> cancelled");
+                return TypedActionResult.fail(stack);
             }
 
-            return ActionResult.PASS;
+            return TypedActionResult.pass(ItemStack.EMPTY);
         });
 
+//        UseItemCallback.EVENT.register((player, world, hand) -> {
+//            var stack = player.getStackInHand(player.getActiveHand());
+//            if (stack.isOf(Items.WATER_BUCKET)) {
+//                return TypedActionResult.fail(stack); // Cancel player from placing water
+//            } else if (stack.isOf(Items.IRON_AXE)) {
+//                // HOW TO GET THE TARGET BLOCK
+//                // IF IT IS WATER OR LAVA -> CANCEL
+//                player.getCameraBlockPos();
+//
+//
+////                player.getBlockStateAtPos()
+//                System.out.println("[camera pos] player is looking at: " + player.getCameraBlockPos().toString());
+//                System.out.println("[EYE POS]player is looking at: " + player.getEyePos());
+//                System.out.println("[getCameraPosVec]player is looking at: " + player.getEyePos());
+////                var state = world.getBlockState(new BlockPos(player.getEyePos()));
+////                var state = world.getBlockState(new BlockPos(player.getCameraBlockPos()));
+//                var state = world.getBlockState(new BlockPos(player.getCameraPosVec(1.0f)));
+////                var block = world.getBlockEntity(new BlockPos(player.getEyePos()));
+////                var block = world.getBlockEntity(new BlockPos(player.getCameraBlockPos()));
+//                var block = world.getBlockEntity(new BlockPos(player.getCameraPosVec(1.0f)));
+//                if (block == null) {
+//                    System.out.println("NULL BLOCK ENTITY");
+//                } else {
+//                    System.out.println("block.getCachedState().getFluidState().getClass().getName(): " + block.getCachedState().getFluidState().getClass().getName());
+//                    System.out.println("block.getCachedState().getFluidState().getFluid().toString(): " + block.getCachedState().getFluidState().getFluid().toString());
+//                }
+//                System.out.println("state.getBlock().asItem().getTranslationKey(): " + state.getBlock().asItem().getTranslationKey());
+//                System.out.println("state.getBlock().getName(): " + state.getBlock().getName());
+//            }
+//            return TypedActionResult.pass(stack);
+//        });
+
+//        AttackBlockCallback.EVENT.register((player, world, hand, pos, direction) -> {
+//            var stack = player.getStackInHand(player.getActiveHand());
+//            System.out.println("player stack in hand: " + stack.getTranslationKey());
+//
+//            var state = world.getBlockState(pos);
+//            var block = world.getBlockEntity(pos);
+//
+//            if (block == null) {
+//                System.out.println("NULL BLOCK ENTITY");
+//            } else {
+//                System.out.println("block.getCachedState().getFluidState().getClass().getName(): " + block.getCachedState().getFluidState().getClass().getName());
+//                System.out.println("block.getCachedState().getFluidState().getFluid().toString(): " + block.getCachedState().getFluidState().getFluid().toString());
+//            }
+//            System.out.println("state.getBlock().asItem().getTranslationKey(): " + state.getBlock().asItem().getTranslationKey());
+//            System.out.println("state.getBlock().getName(): " + state.getBlock().getName());
+//            return ActionResult.PASS;
+//        });
+
+//        UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
+//
+//            var stack = player.getStackInHand(player.getActiveHand());
+//            System.out.println("player stack in hand: " + stack.getTranslationKey());
+//
+////            var state = world.getBlockState(hitResult.getBlockPos());
+////            var block = world.getBlockEntity(hitResult.getBlockPos());
+//            var fluidState = world.getFluidState(hitResult.getBlockPos());
+//            var fluidState2 = world.getFluidState(new BlockPos(hitResult.getBlockPos().getX(), hitResult.getBlockPos().getY() + 1, hitResult.getBlockPos().getZ()));
+//
+//            System.out.println("fluidState.getClass(): "+fluidState.getClass());
+//            System.out.println("fluidState.getFluid().getClass(): "+fluidState.getFluid().getClass());
+//            System.out.println("getTranslationKey: "+fluidState.getBlockState().getBlock().asItem().getTranslationKey());
+//
+//            System.out.println("fluidState2.getClass(): "+fluidState2.getClass());
+//            System.out.println("fluidState2.getFluid().getClass(): "+fluidState2.getFluid().getClass());
+//            System.out.println("getTranslationKey: "+fluidState2.getBlockState().getBlock().asItem().getTranslationKey());
+//
+//            if(fluidState2.getFluid() instanceof LavaFluid lavaFluid){
+//                System.out.println("right clicked on LAVA");
+//                return ActionResult.FAIL;
+//            }
+//
+//
+////            if (block == null) {
+////                System.out.println("NULL BLOCK ENTITY");
+////            } else {
+////                System.out.println("block.getCachedState().getFluidState().getClass().getName(): " + block.getCachedState().getFluidState().getClass().getName());
+////                System.out.println("block.getCachedState().getFluidState().getFluid().toString(): " + block.getCachedState().getFluidState().getFluid().toString());
+////            }
+////            System.out.println("state.getBlock().asItem().getTranslationKey(): " + state.getBlock().asItem().getTranslationKey());
+////            System.out.println("state.getBlock().getName(): " + state.getBlock().getName());
+//
+//            return ActionResult.PASS;
+//        });
 
         // Events triggered when the game is paused
         PlayerMoveCallback.EVENT.register(pauseEvents::stopThePlayersFromMoving);
@@ -111,61 +197,15 @@ public class FKGame {
     static class RunningEvents {
 
         @FunctionalInterface
-        private interface BreakPlaceImpl {
-            boolean manageBreakPlaceEvent(boolean isPlayerInHisOwnBase, boolean isPlayerInAnEnemyBase, boolean isPlayerCloseToHisOwnBase, boolean isPlayerCloseToAnEnemyBase);
+        private interface BreakPlaceImpl<T> {
+            T breakOrPlaceBlocksEventImpl(boolean isPlayerInHisOwnBase, boolean isPlayerInAnEnemyBase, boolean isPlayerCloseToHisOwnBase, boolean isPlayerCloseToAnEnemyBase);
 
         }
 
         @SuppressWarnings({"RedundantIfStatement"})
         private boolean cancelPlayerFromBreakingBlocks(World world, PlayerEntity player, BlockPos pos, BlockState state, /* Nullable */ BlockEntity blockEntity) {
 
-//            var isPlayerInHisOwnBase = false;
-//
-//            var isPlayerInAnEnemyBase = false;
-//
-//            // Is the player close to his own base, but not inside
-//            var isPlayerCloseToHisOwnBase = false;
-//
-//            // Is the player close to an enemy base, but not inside
-//            var isPlayerCloseToAnEnemyBase = false;
-//
-//            for (FKTeam team : Configs.BASES_CONFIG.config.teams) {
-//                var baseSquare = team.getBase().getSquare();
-//
-//                // Is this base the base of the player who break the block ?
-//                var isBaseOfPlayer = team.getPlayers().stream().anyMatch(fkPlayerName -> player.getName().asString().equals(fkPlayerName));
-//
-//                var isPlayerCloseToABase = false;
-//
-//                var proximitySquare = new Square((short) (baseSquare.getSize() + 5), baseSquare.getX(), baseSquare.getY(), baseSquare.getZ());
-//                if (Utils.isPlayerInsideArea(proximitySquare, new Vec3d(player.getX(), player.getY(), player.getZ()))) {
-//                    isPlayerCloseToABase = true;
-//                }
-//
-//                // If player is inside a base
-//                if (Utils.isPlayerInsideArea(baseSquare, new Vec3d(player.getX(), player.getY(), player.getZ()))) {
-//
-//                    // And this base is not his own
-//                    if (!isBaseOfPlayer) {
-//                        isPlayerInAnEnemyBase = true;
-//                    } else {
-//                        isPlayerInHisOwnBase = true;
-//                    }
-//
-//                } else {
-//
-//                    // If the player is close to a base, but not inside
-//                    if (isPlayerCloseToABase) {
-//                        if (!isPlayerInHisOwnBase) isPlayerCloseToHisOwnBase = true;
-//                        if (!isPlayerInAnEnemyBase) isPlayerCloseToAnEnemyBase = true;
-//                    }
-//
-//                }
-//
-//
-//            }
-
-            var breakPlace = (BreakPlaceImpl)(isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase) -> {
+            var breakPlace = (BreakPlaceImpl<Boolean>) (isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase) -> {
                 var block = world.getBlockState(pos).getBlock();
 
                 // If the player is inside an enemy base
@@ -191,6 +231,7 @@ public class FKGame {
                     if (block != Blocks.TNT) { // We cancel the block that had to be broken except if it is TNT
                         return false;
                     }
+                    return true;
                 }
 
                 System.out.println("Player is in the wild");
@@ -198,25 +239,52 @@ public class FKGame {
                 return true;
             };
 
-            return cancelPlayerFromBreakingOrPlacingBlocks(player,new Vec3d(pos.getX(), pos.getY(), pos.getZ()), breakPlace);
+            return cancelPlayerFromBreakingOrPlacingBlocks(player, new Vec3d(pos.getX(), pos.getY(), pos.getZ()), breakPlace);
 
         }
 
-        private boolean cancelPlayerFromPlacingBlocks(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
+        private ActionResult cancelPlayerFromPlacingBlocks(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
 
-            var breakPlace = (BreakPlaceImpl)(isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase) -> {
+            var breakPlace = (BreakPlaceImpl<ActionResult>) (isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase) -> {
 
+                var placedItemStack = player.getStackInHand(player.getActiveHand());
 
-                return true;
+                // If the player is inside an enemy base
+                if (isPlayerInAnEnemyBase) {
+                    if (!placedItemStack.isOf(Items.TNT)) {
+                        return ActionResult.FAIL;
+                    }
+                    return ActionResult.PASS;
+                }
+
+                if (isPlayerInHisOwnBase) {
+                    // TODO Nothing to do for now
+                    return ActionResult.PASS;
+                }
+
+                if (isPlayerCloseToHisOwnBase) {
+                    // TODO Nothing to do for now
+                    return ActionResult.PASS;
+                }
+
+                // A player can place blocks outside his base, except if it is near another base (except TNT)
+                if (isPlayerCloseToAnEnemyBase) {
+                    if (!placedItemStack.isOf(Items.TNT)) {
+                        return ActionResult.FAIL;
+                    }
+                    return ActionResult.PASS;
+                }
+
+                System.out.println("Player is in the wild");
+
+                return ActionResult.PASS;
             };
 
             var blockPos = hitResult.getBlockPos();
-            cancelPlayerFromBreakingOrPlacingBlocks(player, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()),breakPlace);
-
-            return true;
+            return cancelPlayerFromBreakingOrPlacingBlocks(player, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), breakPlace);
         }
 
-        private boolean cancelPlayerFromBreakingOrPlacingBlocks(PlayerEntity player, Vec3d blockPos, BreakPlaceImpl breakPlace){
+        private <T> T cancelPlayerFromBreakingOrPlacingBlocks(PlayerEntity player, Vec3d blockPos, BreakPlaceImpl<T> breakPlace) {
 
             var isPlayerInHisOwnBase = false;
 
@@ -255,11 +323,11 @@ public class FKGame {
 
                     // If the player is close to a base, but not inside
                     if (isPlayerCloseToABase) {
-                        if (!isPlayerInHisOwnBase){
-                            if(isBaseOfPlayer)isPlayerCloseToHisOwnBase = true;
+                        if (!isPlayerInHisOwnBase) {
+                            if (isBaseOfPlayer) isPlayerCloseToHisOwnBase = true;
                             else isPlayerCloseToAnEnemyBase = true;
-                        }else if(!isPlayerInAnEnemyBase){
-                            if(!isBaseOfPlayer)isPlayerCloseToAnEnemyBase = true;
+                        } else if (!isPlayerInAnEnemyBase) {
+                            if (!isBaseOfPlayer) isPlayerCloseToAnEnemyBase = true;
                             else isPlayerCloseToHisOwnBase = true;
                         }
                     }
@@ -268,7 +336,7 @@ public class FKGame {
 
             }
 
-            return breakPlace.manageBreakPlaceEvent(isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase);
+            return breakPlace.breakOrPlaceBlocksEventImpl(isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase);
         }
 
     }

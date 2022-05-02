@@ -1,0 +1,27 @@
+package ch.skyfy.fk.events;
+
+import net.fabricmc.fabric.api.event.Event;
+import net.fabricmc.fabric.api.event.EventFactory;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.Fluid;
+import net.minecraft.item.BucketItem;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
+import net.minecraft.util.TypedActionResult;
+import net.minecraft.world.World;
+
+public interface BucketFillEvent {
+    Event<BucketFillEvent> EVENT = EventFactory.createArrayBacked(BucketFillEvent.class,
+            (listeners) -> (world, player, hand, fillFluid, bucketItem) -> {
+                for (BucketFillEvent listener : listeners) {
+                    var result = listener.onUse(world, player, hand, fillFluid, bucketItem);
+                    if (result.getResult() != ActionResult.PASS) {
+                        return result;
+                    }
+                }
+                return TypedActionResult.pass(ItemStack.EMPTY);
+            });
+
+    TypedActionResult<ItemStack> onUse(World world, PlayerEntity player, Hand hand, Fluid fillFluid, BucketItem bucketItem);
+}
