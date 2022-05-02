@@ -1,5 +1,6 @@
 package ch.skyfy.fk.logic;
 
+import ch.skyfy.fk.FK;
 import ch.skyfy.fk.ScoreboardManager;
 import net.minecraft.server.MinecraftServer;
 
@@ -13,15 +14,12 @@ public class Timeline {
 
     private final AtomicInteger dayRef, minutesRef, secondsRef;
 
-    private final AtomicLong startTickRef;
-
     private final MinecraftServer server;
 
     {
         dayRef = new AtomicInteger(0);
         minutesRef = new AtomicInteger(0);
         secondsRef = new AtomicInteger(0);
-        startTickRef = new AtomicLong(0);
     }
 
     public Timeline(MinecraftServer server) {
@@ -29,8 +27,6 @@ public class Timeline {
     }
 
     public void startTimer() {
-        startTickRef.set(server.getOverworld().getTime());
-
         dayRef.getAndIncrement();
 
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1, r -> new Thread(r) {{
@@ -42,9 +38,9 @@ public class Timeline {
             minutesRef.set((int) (timeInTick / 1200d));
             secondsRef.set((int) (((timeInTick / 1200d) - minutesRef.get()) * 60));
 
-            if (server.getOverworld().getTime() - startTickRef.get() >= 24_000) {
+            if(timeInTick >= 24000) {
+                server.getOverworld().setTimeOfDay(0L);
                 dayRef.getAndIncrement();
-                startTickRef.set(server.getOverworld().getTime());
             }
 
             // Update player sidebar

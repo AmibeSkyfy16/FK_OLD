@@ -11,7 +11,8 @@
     "LivingEntityMixin",
     "PlayerEntityMixin",
     "ServerPlayerEntityMixin",
-    "ServerPlayNetworkHandlerMixin"
+    "ServerPlayNetworkHandlerMixin",
+    "ServerWorldMixin"
   ],
   "client": [
   ],

@@ -4,11 +4,11 @@ public class Square {
 
     private short size; // A base is always square
 
-    private int x, y, z; // Represents the center of the base (the center of the square)
+    private double x, y, z; // Represents the center of the base (the center of the square)
 
     public Square(){}
 
-    public Square(short size, int x, int y, int z) {
+    public Square(short size, double x, double y, double z) {
         this.size = size;
         this.x = x;
         this.y = y;
@@ -23,27 +23,27 @@ public class Square {
         this.size = size;
     }
 
-    public int getX() {
+    public double getX() {
         return x;
     }
 
-    public void setX(int x) {
+    public void setX(double x) {
         this.x = x;
     }
 
-    public int getY() {
+    public double getY() {
         return y;
     }
 
-    public void setY(int y) {
+    public void setY(double y) {
         this.y = y;
     }
 
-    public int getZ() {
+    public double getZ() {
         return z;
     }
 
-    public void setZ(int z) {
+    public void setZ(double z) {
         this.z = z;
     }
 }

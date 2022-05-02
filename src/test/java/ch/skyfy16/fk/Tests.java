@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Tests {
@@ -91,9 +92,19 @@ public class Tests {
 
     @Test
     public void AtomicTest(){
-        var at = new AtomicReference<Short>((short)0);
-        at.set((short) (at.get() + 1));
-        System.out.println(at.get());
+//        var at = new AtomicReference<Short>((short)0);
+//        at.set((short) (at.get() + 1));
+//        System.out.println(at.get());
+
+
+        var b1 = new AtomicBoolean(false);
+        doing(b1);
+        System.out.println(b1.get());
+
+    }
+
+    private void doing(AtomicBoolean b1){
+        b1.set(true);
     }
 
 }

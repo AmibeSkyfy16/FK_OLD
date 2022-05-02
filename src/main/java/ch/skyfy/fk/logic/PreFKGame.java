@@ -2,46 +2,36 @@ package ch.skyfy.fk.logic;
 
 import ch.skyfy.fk.FK;
 import ch.skyfy.fk.ScoreboardManager;
-import ch.skyfy.fk.commands.StartCmd;
 import ch.skyfy.fk.config.Configs;
 import ch.skyfy.fk.events.PlayerDamageCallback;
 import ch.skyfy.fk.events.PlayerMoveCallback;
 import me.bymartrixx.playerevents.api.event.PlayerJoinCallback;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.math.Vec3d;
 
 import java.util.stream.StreamSupport;
 
 import static ch.skyfy.fk.FK.GAME_STATE;
 
-@SuppressWarnings("ConstantConditions")
+@SuppressWarnings({"ConstantConditions", "FieldCanBeLocal"})
 public class PreFKGame {
 
-    private final StartCmd startCmd;
+    private final ch.skyfy.fk.commands.CommandManager commandManager;
 
     public PreFKGame() {
-        this.startCmd = new StartCmd(this);
+        this.commandManager = new ch.skyfy.fk.commands.CommandManager(this);
     }
 
     public void registerAll() {
 
-        registerCommands();
+        commandManager.registerCommands();
 
         PlayerJoinCallback.EVENT.register(this::teleportPlayerToWaitingRoom);
         PlayerDamageCallback.EVENT.register(this::onPlayerDamage);
         PlayerMoveCallback.EVENT.register(this::onPlayerMove);
-    }
-
-    private void registerCommands(){
-        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
-            dispatcher.register(CommandManager.literal("start").executes(startCmd));
-        });
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -54,7 +44,8 @@ public class PreFKGame {
                 .findFirst()
                 .ifPresent(serverWorld -> {
                     // Player like admin player, don't have to be teleported
-                    if(!GameUtils.isFKPlayer(server.getPlayerManager().getPlayerList(), player.getName().asString())) return;
+                    if (!GameUtils.isFKPlayer(server.getPlayerManager().getPlayerList(), player.getName().asString()))
+                        return;
 
                     updateTeam(server, player);
                     ScoreboardManager.getInstance().updateSidebar(player, 0, 0, 0);
@@ -63,7 +54,7 @@ public class PreFKGame {
                 });
     }
 
-    private void updateTeam(MinecraftServer server, ServerPlayerEntity player){
+    private void updateTeam(MinecraftServer server, ServerPlayerEntity player) {
         var playerName = player.getName().asString();
 
         var serverScoreboard = server.getScoreboard();
@@ -87,38 +78,23 @@ public class PreFKGame {
     }
 
     private ActionResult onPlayerDamage(DamageSource source, float amount) {
-        if (GAME_STATE != FK.GameState.NOT_STARTED) return ActionResult.SUCCESS;
-        return ActionResult.FAIL;
+        if (GAME_STATE == FK.GameState.NOT_STARTED) return ActionResult.FAIL;
+        return ActionResult.PASS;
     }
 
     /**
      * Prevents the player from leaving the waiting room
      */
     private ActionResult onPlayerMove(PlayerMoveCallback.MoveData moveData, ServerPlayerEntity player) {
-
-        if (GAME_STATE != FK.GameState.NOT_STARTED) return ActionResult.SUCCESS;
+        if (GAME_STATE != FK.GameState.NOT_STARTED) return ActionResult.PASS;
 
         var waitingRoom = Configs.FK_CONFIG.config.waitingRoom;
         var square = waitingRoom.getSquare();
 
-        Vec3d vec = null;
-
-        if (player.getX() >= square.getX() + square.getSize()) {
-            vec = new Vec3d(player.getX() - 1, player.getY(), player.getZ());
-        } else if (player.getX() <= square.getX() - square.getSize()) {
-            vec = new Vec3d(player.getX() + 1, player.getY(), player.getZ());
-        } else if (player.getZ() >= square.getZ() + square.getSize()) {
-            vec = new Vec3d(player.getZ() - 1, player.getY(), player.getZ() - 1);
-        } else if (player.getZ() <= square.getZ() - square.getSize()) {
-            vec = new Vec3d(player.getX(), player.getY(), player.getZ() + 1);
-        }
-
-        if (vec != null) {
-            player.teleport(vec.x, vec.y, vec.z);
+        if (Utils.didPlayerTryToLeaveAnArea(square, player))
             return ActionResult.FAIL;
-        }
 
-        return ActionResult.SUCCESS;
+        return ActionResult.PASS;
     }
 
 }

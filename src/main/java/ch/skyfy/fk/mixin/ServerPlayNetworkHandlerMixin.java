@@ -42,7 +42,7 @@ public class ServerPlayNetworkHandlerMixin {
             cancellable = true
     )
     private void onPlayerMove(PlayerMoveC2SPacket playerMoveC2SPacket, CallbackInfo ci) {
-        ActionResult result = PlayerMoveCallback.EVENT.invoker().onMove(
+        var result = PlayerMoveCallback.EVENT.invoker().onMove(
                 new PlayerMoveCallback.MoveData(lastTickX,
                         lastTickY,
                         lastTickZ,

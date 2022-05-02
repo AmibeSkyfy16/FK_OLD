@@ -1,12 +1,10 @@
 package ch.skyfy.fk;
 
 
-import ch.skyfy.fk.commands.StartCmd;
 import ch.skyfy.fk.config.Configs;
 import ch.skyfy.fk.config.core.BetterConfig;
 import ch.skyfy.fk.logic.PreFKGame;
 import net.fabricmc.api.DedicatedServerModInitializer;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
