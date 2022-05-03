@@ -9,7 +9,7 @@ import ch.skyfy.fk.FK;
  */
 public class Configs {
     public static final ConfigData<FKConfig> FK_CONFIG = new ConfigData<>("fkconfig.json", FKConfig.class);
-    public static final ConfigData<TeamsConfig> BASES_CONFIG = new ConfigData<>("bases.json", TeamsConfig.class);
+    public static final ConfigData<TeamsConfig> BASES_CONFIG = new ConfigData<>("teams.json", TeamsConfig.class);
 
     static {
         FK.LOGGER.info(Configs.class.getName() + " has been loaded");

@@ -1,9 +1,12 @@
 package ch.skyfy.fk.logic;
 
+import ch.skyfy.fk.FK;
 import ch.skyfy.fk.config.Configs;
 import ch.skyfy.fk.config.data.FKTeam;
+import ch.skyfy.fk.logic.data.AllData;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
@@ -70,6 +73,59 @@ public class GameUtils {
             }
         }
         return null;
+    }
+
+    public static boolean isInTheSameTeam(String playerName, String anotherPlayerName){
+        for (FKTeam fkTeam : Configs.BASES_CONFIG.config.teams) {
+            if(fkTeam.getPlayers().stream().anyMatch(playerName::equals) && fkTeam.getPlayers().stream().anyMatch(anotherPlayerName::equals))
+                return true;
+        }
+        return false;
+    }
+
+    public static boolean areMissingPlayers(List<ServerPlayerEntity> onlinePlayers){
+        var missingPlayers = GameUtils.ArePlayersReady(onlinePlayers);
+        return !missingPlayers.isEmpty();
+    }
+
+    public static void sendMissingPlayersMessage(ServerPlayerEntity player, List<ServerPlayerEntity> onlinePlayers){
+        var missingPlayers = GameUtils.ArePlayersReady(onlinePlayers);
+        if (!missingPlayers.isEmpty()) {
+            var sb = new StringBuilder();
+            missingPlayers.forEach(missingPlayer -> sb.append(missingPlayer).append("\n"));
+            player.sendMessage(Text.of("the game cannot be started because the following players are missing\n" + sb), false);
+        }
+    }
+
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    public static boolean isGameStateRUNNING(){
+        return AllData.FK_GAME_DATA.config.getGameState() == FK.GameState.RUNNING;
+    }
+
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    public static boolean isGameStatePAUSE(){
+        return AllData.FK_GAME_DATA.config.getGameState() == FK.GameState.PAUSED;
+    }
+
+    public static boolean isGameStateNOT_STARTED(){
+        return AllData.FK_GAME_DATA.config.getGameState() == FK.GameState.NOT_STARTED;
+    }
+
+
+    public static boolean areAssaultEnabled(int currentDay){
+        return currentDay >= Configs.FK_CONFIG.config.dayOfAuthorizationOfTheAssaults;
+    }
+
+    public static boolean isNetherEnabled(int currentDay){
+        return currentDay >= Configs.FK_CONFIG.config.dayOfAuthorizationOfTheEntryInTheNether;
+    }
+
+    public static boolean isEndEnabled(int currentDay){
+        return currentDay >= Configs.FK_CONFIG.config.dayOfAuthorizationOfTheEntryInTheEnd;
+    }
+
+    public static boolean isPvPEnabled(int currentDay){
+        return currentDay >= Configs.FK_CONFIG.config.dayOfAuthorizationOfThePvP;
     }
 
 }

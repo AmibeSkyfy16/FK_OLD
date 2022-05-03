@@ -3,6 +3,8 @@ package ch.skyfy.fk.commands;
 import ch.skyfy.fk.FK;
 import ch.skyfy.fk.logic.FKGame;
 import ch.skyfy.fk.logic.PreFKGame;
+import ch.skyfy.fk.logic.data.AllData;
+import ch.skyfy.fk.logic.data.FKGameData;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -23,6 +25,8 @@ public class ResumeCmd implements Command<ServerCommandSource> {
 
     private final AtomicReference<FKGame> fkGameRef;
 
+    private final FKGameData fkGameData = AllData.FK_GAME_DATA.config;
+
     public ResumeCmd(PreFKGame preFKGame, AtomicReference<FKGame> fkGameRef) {
         this.preFKGame = preFKGame;
         this.fkGameRef = fkGameRef;
@@ -34,18 +38,21 @@ public class ResumeCmd implements Command<ServerCommandSource> {
         var source = context.getSource();
         var player = source.getPlayer();
 
-        switch (FK.GAME_STATE){
-            case NOT_STARTED -> player.sendMessage(new LiteralText("The game cannot be resumed because it is not started !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
-            case RUNNING -> player.sendMessage(new LiteralText("The game cannot be resumed because it is running !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
-            case PAUSED -> {
+        if (!player.hasPermissionLevel(4)) {
+            player.sendMessage(Text.of("You dont have required privileges to use this command"), false);
+            return 0;
+        }
 
+        switch (fkGameData.getGameState()) {
+            case NOT_STARTED ->
+                    player.sendMessage(new LiteralText("The game cannot be resumed because it is not started !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
+            case RUNNING ->
+                    player.sendMessage(new LiteralText("The game cannot be resumed because it is running !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
+            case PAUSED -> {
                 source.getServer().getPlayerManager().broadcast(new LiteralText("The game has been resumed").setStyle(Style.EMPTY.withColor(Formatting.GREEN)), MessageType.CHAT, NIL_UUID);
 
-                // Normally the fkGame should not be null, but you never know
-                if(fkGameRef.get() != null){
-                    FK.GAME_STATE = FK.GameState.RUNNING;
-                    fkGameRef.get().resume();
-                }
+                fkGameData.setGameState(FK.GameState.RUNNING);
+                fkGameRef.get().resume(player);
             }
         }
 

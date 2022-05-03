@@ -9,13 +9,14 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.world.World;
 
 public interface BucketEmptyEvent {
     Event<BucketEmptyEvent> EVENT = EventFactory.createArrayBacked(BucketEmptyEvent.class,
-            (listeners) -> (world, player, hand, fillFluid, bucketItem) -> {
+            (listeners) -> (world, player, hand, emptyFluid, bucketItem, blockHitResult) -> {
                 for (BucketEmptyEvent listener : listeners) {
-                    var result = listener.onUse(world, player, hand, fillFluid, bucketItem);
+                    var result = listener.onUse(world, player, hand, emptyFluid, bucketItem, blockHitResult);
                     if (result.getResult() != ActionResult.PASS) {
                         return result;
                     }
@@ -33,5 +34,5 @@ public interface BucketEmptyEvent {
      * @param emptyFluid Fluid, The fluid that the player is trying to drain
      * @param bucketItem BucketItem, The Bucket that the player tries to empty
      */
-    TypedActionResult<ItemStack> onUse(World world, PlayerEntity player, Hand hand, Fluid emptyFluid, BucketItem bucketItem);
+    TypedActionResult<ItemStack> onUse(World world, PlayerEntity player, Hand hand, Fluid emptyFluid, BucketItem bucketItem, BlockHitResult blockHitResult);
 }

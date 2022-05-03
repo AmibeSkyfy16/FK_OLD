@@ -1,41 +1,42 @@
 package ch.skyfy.fk.logic;
 
-import ch.skyfy.fk.FK;
 import ch.skyfy.fk.config.Configs;
 import ch.skyfy.fk.config.data.FKTeam;
-import ch.skyfy.fk.config.data.Square;
+import ch.skyfy.fk.config.data.Cube;
 import ch.skyfy.fk.events.*;
+import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
-import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.TntBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MovementType;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.LavaFluid;
+import net.minecraft.fluid.WaterFluid;
+import net.minecraft.item.BucketItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Style;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.*;
 import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraft.world.dimension.DimensionType;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-
-import static ch.skyfy.fk.FK.GAME_STATE;
 
 public class FKGame {
 
@@ -45,7 +46,7 @@ public class FKGame {
 
     private final PauseEvents pauseEvents;
 
-    private final RunningEvents runningEvents;
+    private final FKGameEvents FKGameEvents;
 
     private final Map<String, Vec3d> playerPositionWhenPaused;
 
@@ -53,7 +54,7 @@ public class FKGame {
         this.server = server;
         this.timeline = new Timeline(server);
         pauseEvents = new PauseEvents();
-        runningEvents = new RunningEvents();
+        FKGameEvents = new FKGameEvents();
         this.playerPositionWhenPaused = new HashMap<>();
 
         registerEvents();
@@ -79,133 +80,56 @@ public class FKGame {
             playerPositionWhenPaused.putIfAbsent(fkPlayer.getUuidAsString(), new Vec3d(fkPlayer.getX(), fkPlayer.getY(), fkPlayer.getZ()));
     }
 
-    public void resume() {
+    public void resume(ServerPlayerEntity player) {
+
+        if(GameUtils.areMissingPlayers(server.getPlayerManager().getPlayerList())){
+            GameUtils.sendMissingPlayersMessage(player, server.getPlayerManager().getPlayerList());
+        }
+
+        // If the timeline wasn't started (in the case of a server restart with gamestate at PAUSE OR RUNNING)
+        if(!timeline.getIsRunningRef().get()){
+            timeline.startTimer();
+        }
+
         playerPositionWhenPaused.clear();
     }
 
     private void registerEvents() {
 
-        PlayerBlockBreakEvents.BEFORE.register(runningEvents::cancelPlayerFromBreakingBlocks);
-        UseBlockCallback.EVENT.register(runningEvents::cancelPlayerFromPlacingBlocks);
+        // Event use when the game state is "running"
+        PlayerBlockBreakEvents.BEFORE.register(FKGameEvents::cancelPlayerFromBreakingBlocks);
+        UseBlockCallback.EVENT.register(FKGameEvents::cancelPlayerFromPlacingBlocks);
+        BucketFillEvent.EVENT.register(FKGameEvents::cancelPlayerFromFillingABucket);
+        BucketEmptyEvent.EVENT.register(FKGameEvents::cancelPlayerFromEmptyingABucket);
+        UseBlockCallback.EVENT.register(FKGameEvents::cancelPlayerFromFiringATNT);
+        AttackEntityCallback.EVENT.register(FKGameEvents::cancelPlayerPvP);
+        PlayerEnterPortalCallback.EVENT.register(FKGameEvents::cancelPlayerFromEnteringInPortal);
 
-        BucketFillEvent.EVENT.register((world, player, hand, fillFluid, bucketItem) -> {
-            var stack = player.getStackInHand(player.getActiveHand());
-            System.out.println("sa marche");
 
-            if(fillFluid instanceof LavaFluid){
-                System.out.println("LavaFluid -> cancelled");
-                return TypedActionResult.fail(stack);
-            }
-
-            return TypedActionResult.pass(ItemStack.EMPTY);
-        });
-
-//        UseItemCallback.EVENT.register((player, world, hand) -> {
-//            var stack = player.getStackInHand(player.getActiveHand());
-//            if (stack.isOf(Items.WATER_BUCKET)) {
-//                return TypedActionResult.fail(stack); // Cancel player from placing water
-//            } else if (stack.isOf(Items.IRON_AXE)) {
-//                // HOW TO GET THE TARGET BLOCK
-//                // IF IT IS WATER OR LAVA -> CANCEL
-//                player.getCameraBlockPos();
-//
-//
-////                player.getBlockStateAtPos()
-//                System.out.println("[camera pos] player is looking at: " + player.getCameraBlockPos().toString());
-//                System.out.println("[EYE POS]player is looking at: " + player.getEyePos());
-//                System.out.println("[getCameraPosVec]player is looking at: " + player.getEyePos());
-////                var state = world.getBlockState(new BlockPos(player.getEyePos()));
-////                var state = world.getBlockState(new BlockPos(player.getCameraBlockPos()));
-//                var state = world.getBlockState(new BlockPos(player.getCameraPosVec(1.0f)));
-////                var block = world.getBlockEntity(new BlockPos(player.getEyePos()));
-////                var block = world.getBlockEntity(new BlockPos(player.getCameraBlockPos()));
-//                var block = world.getBlockEntity(new BlockPos(player.getCameraPosVec(1.0f)));
-//                if (block == null) {
-//                    System.out.println("NULL BLOCK ENTITY");
-//                } else {
-//                    System.out.println("block.getCachedState().getFluidState().getClass().getName(): " + block.getCachedState().getFluidState().getClass().getName());
-//                    System.out.println("block.getCachedState().getFluidState().getFluid().toString(): " + block.getCachedState().getFluidState().getFluid().toString());
-//                }
-//                System.out.println("state.getBlock().asItem().getTranslationKey(): " + state.getBlock().asItem().getTranslationKey());
-//                System.out.println("state.getBlock().getName(): " + state.getBlock().getName());
-//            }
-//            return TypedActionResult.pass(stack);
-//        });
-
-//        AttackBlockCallback.EVENT.register((player, world, hand, pos, direction) -> {
-//            var stack = player.getStackInHand(player.getActiveHand());
-//            System.out.println("player stack in hand: " + stack.getTranslationKey());
-//
-//            var state = world.getBlockState(pos);
-//            var block = world.getBlockEntity(pos);
-//
-//            if (block == null) {
-//                System.out.println("NULL BLOCK ENTITY");
-//            } else {
-//                System.out.println("block.getCachedState().getFluidState().getClass().getName(): " + block.getCachedState().getFluidState().getClass().getName());
-//                System.out.println("block.getCachedState().getFluidState().getFluid().toString(): " + block.getCachedState().getFluidState().getFluid().toString());
-//            }
-//            System.out.println("state.getBlock().asItem().getTranslationKey(): " + state.getBlock().asItem().getTranslationKey());
-//            System.out.println("state.getBlock().getName(): " + state.getBlock().getName());
-//            return ActionResult.PASS;
-//        });
-
-//        UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
-//
-//            var stack = player.getStackInHand(player.getActiveHand());
-//            System.out.println("player stack in hand: " + stack.getTranslationKey());
-//
-////            var state = world.getBlockState(hitResult.getBlockPos());
-////            var block = world.getBlockEntity(hitResult.getBlockPos());
-//            var fluidState = world.getFluidState(hitResult.getBlockPos());
-//            var fluidState2 = world.getFluidState(new BlockPos(hitResult.getBlockPos().getX(), hitResult.getBlockPos().getY() + 1, hitResult.getBlockPos().getZ()));
-//
-//            System.out.println("fluidState.getClass(): "+fluidState.getClass());
-//            System.out.println("fluidState.getFluid().getClass(): "+fluidState.getFluid().getClass());
-//            System.out.println("getTranslationKey: "+fluidState.getBlockState().getBlock().asItem().getTranslationKey());
-//
-//            System.out.println("fluidState2.getClass(): "+fluidState2.getClass());
-//            System.out.println("fluidState2.getFluid().getClass(): "+fluidState2.getFluid().getClass());
-//            System.out.println("getTranslationKey: "+fluidState2.getBlockState().getBlock().asItem().getTranslationKey());
-//
-//            if(fluidState2.getFluid() instanceof LavaFluid lavaFluid){
-//                System.out.println("right clicked on LAVA");
-//                return ActionResult.FAIL;
-//            }
-//
-//
-////            if (block == null) {
-////                System.out.println("NULL BLOCK ENTITY");
-////            } else {
-////                System.out.println("block.getCachedState().getFluidState().getClass().getName(): " + block.getCachedState().getFluidState().getClass().getName());
-////                System.out.println("block.getCachedState().getFluidState().getFluid().toString(): " + block.getCachedState().getFluidState().getFluid().toString());
-////            }
-////            System.out.println("state.getBlock().asItem().getTranslationKey(): " + state.getBlock().asItem().getTranslationKey());
-////            System.out.println("state.getBlock().getName(): " + state.getBlock().getName());
-//
-//            return ActionResult.PASS;
-//        });
-
-        // Events triggered when the game is paused
+        // Event use when the game state is "pause"
         PlayerMoveCallback.EVENT.register(pauseEvents::stopThePlayersFromMoving);
         EntityMoveCallback.EVENT.register(pauseEvents::stopEntitiesFromMoving);
         PlayerDamageCallback.EVENT.register(pauseEvents::onPlayerDamage);
         TimeOfDayUpdatedCallback.EVENT.register(pauseEvents::cancelTimeOfDayToBeingUpdated);
     }
 
+    /**
+     * This class contains events that will be used when the game state is "RUNNING
+     */
     @SuppressWarnings("ConstantConditions")
-    static class RunningEvents {
+    class FKGameEvents {
 
         @FunctionalInterface
-        private interface BreakPlaceImpl<T> {
-            T breakOrPlaceBlocksEventImpl(boolean isPlayerInHisOwnBase, boolean isPlayerInAnEnemyBase, boolean isPlayerCloseToHisOwnBase, boolean isPlayerCloseToAnEnemyBase);
+        private interface BreakPlaceFillEmptyImpl<T> {
+            T impl(boolean isPlayerInHisOwnBase, boolean isPlayerInAnEnemyBase, boolean isPlayerCloseToHisOwnBase, boolean isPlayerCloseToAnEnemyBase);
 
         }
 
         @SuppressWarnings({"RedundantIfStatement"})
         private boolean cancelPlayerFromBreakingBlocks(World world, PlayerEntity player, BlockPos pos, BlockState state, /* Nullable */ BlockEntity blockEntity) {
+            if (!GameUtils.isGameStateRUNNING()) return true;
 
-            var breakPlace = (BreakPlaceImpl<Boolean>) (isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase) -> {
+            var breakPlace = (BreakPlaceFillEmptyImpl<Boolean>) (isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase) -> {
                 var block = world.getBlockState(pos).getBlock();
 
                 // If the player is inside an enemy base
@@ -239,20 +163,157 @@ public class FKGame {
                 return true;
             };
 
-            return cancelPlayerFromBreakingOrPlacingBlocks(player, new Vec3d(pos.getX(), pos.getY(), pos.getZ()), breakPlace);
+            return iDontKnowTheNameOfThisMethod(player, new Vec3d(pos.getX(), pos.getY(), pos.getZ()), breakPlace);
 
         }
 
         private ActionResult cancelPlayerFromPlacingBlocks(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
+            if (!GameUtils.isGameStateRUNNING()) return ActionResult.PASS;
 
-            var breakPlace = (BreakPlaceImpl<ActionResult>) (isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase) -> {
+            var placeBlock = (BreakPlaceFillEmptyImpl<ActionResult>) (isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase) -> {
 
                 var placedItemStack = player.getStackInHand(player.getActiveHand());
 
                 // If the player is inside an enemy base
                 if (isPlayerInAnEnemyBase) {
-                    if (!placedItemStack.isOf(Items.TNT)) {
+                    if (!placedItemStack.isOf(Items.TNT))
                         return ActionResult.FAIL;
+                    if (!GameUtils.areAssaultEnabled(timeline.timelineData.getDay()))
+                        return ActionResult.FAIL;
+                    return ActionResult.PASS;
+                }
+
+                if (isPlayerInHisOwnBase) {
+                    // TODO Nothing to do for now
+                    return ActionResult.PASS;
+                }
+
+                if (isPlayerCloseToHisOwnBase) {
+                    return ActionResult.FAIL;
+                }
+
+                // A player can place blocks outside his base, except if it is near another base (except TNT)
+                if (isPlayerCloseToAnEnemyBase) {
+                    if (!placedItemStack.isOf(Items.TNT))
+                        return ActionResult.FAIL;
+                    if (!GameUtils.areAssaultEnabled(timeline.timelineData.getDay()))
+                        return ActionResult.FAIL;
+                    return ActionResult.PASS;
+                }
+
+                System.out.println("Player is in the wild");
+
+                return ActionResult.PASS;
+            };
+
+            var blockPos = hitResult.getBlockPos();
+            return iDontKnowTheNameOfThisMethod(player, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), placeBlock);
+        }
+
+        private TypedActionResult<ItemStack> cancelPlayerFromFillingABucket(World world, PlayerEntity player, Hand hand, Fluid fillFluid, BucketItem bucketItem, BlockHitResult blockHitResult) {
+            if (!GameUtils.isGameStateRUNNING()) return TypedActionResult.pass(player.getStackInHand(hand));
+
+            var fillBucketImpl = (BreakPlaceFillEmptyImpl<TypedActionResult<ItemStack>>) (isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase) -> {
+
+                var placedItemStack = player.getStackInHand(player.getActiveHand());
+
+                // If the player is inside an enemy base
+                if (isPlayerInAnEnemyBase) {
+                    // Player cannot fill a bucket with water or lava inside an enemy base
+                    if (fillFluid instanceof LavaFluid || fillFluid instanceof WaterFluid) {
+                        return TypedActionResult.fail(placedItemStack);
+                    }
+                    return TypedActionResult.pass(placedItemStack);
+                }
+
+                if (isPlayerInHisOwnBase) {
+                    // TODO Nothing to do for now
+                    return TypedActionResult.pass(placedItemStack);
+                }
+
+                if (isPlayerCloseToHisOwnBase) {
+                    return TypedActionResult.pass(placedItemStack);
+                }
+
+                // A player can fill bucket outside his base, except if it is near another base
+                if (isPlayerCloseToAnEnemyBase) {
+                    if (fillFluid instanceof LavaFluid || fillFluid instanceof WaterFluid) {
+                        return TypedActionResult.fail(placedItemStack);
+                    }
+                    return TypedActionResult.pass(placedItemStack);
+                }
+
+                System.out.println("Player is in the wild");
+
+                return TypedActionResult.pass(placedItemStack);
+            };
+
+            var blockPos = blockHitResult.getBlockPos();
+            return FKGameEvents.this.iDontKnowTheNameOfThisMethod(player, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), fillBucketImpl);
+        }
+
+        private TypedActionResult<ItemStack> cancelPlayerFromEmptyingABucket(World world, PlayerEntity player, Hand hand, Fluid emptyFluid, BucketItem bucketItem, BlockHitResult blockHitResult) {
+            if (!GameUtils.isGameStateRUNNING()) return TypedActionResult.pass(player.getStackInHand(hand));
+
+            var emptyBucketImpl = (BreakPlaceFillEmptyImpl<TypedActionResult<ItemStack>>) (isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase) -> {
+
+                var placedItemStack = player.getStackInHand(player.getActiveHand());
+
+                // If the player is inside an enemy base
+                if (isPlayerInAnEnemyBase) {
+                    // Player cannot empty a bucket with water or lava inside an enemy base
+                    if (emptyFluid instanceof LavaFluid || emptyFluid instanceof WaterFluid) {
+                        return TypedActionResult.fail(placedItemStack);
+                    }
+                    return TypedActionResult.pass(placedItemStack);
+                }
+
+                if (isPlayerInHisOwnBase) {
+                    return TypedActionResult.pass(placedItemStack);
+                }
+
+                if (isPlayerCloseToHisOwnBase) {
+                    return TypedActionResult.fail(placedItemStack);
+                }
+
+                // A player can empty bucket outside his base, except if it is near another base
+                if (isPlayerCloseToAnEnemyBase) {
+                    if (emptyFluid instanceof LavaFluid || emptyFluid instanceof WaterFluid) {
+                        return TypedActionResult.fail(placedItemStack);
+                    }
+                    return TypedActionResult.pass(placedItemStack);
+                }
+
+                System.out.println("Player is in the wild");
+
+                return TypedActionResult.pass(placedItemStack);
+            };
+
+            var blockPos = blockHitResult.getBlockPos();
+            return FKGameEvents.this.iDontKnowTheNameOfThisMethod(player, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), emptyBucketImpl);
+        }
+
+        private ActionResult cancelPlayerFromFiringATNT(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
+            if (!GameUtils.isGameStateRUNNING()) return ActionResult.PASS;
+
+            var emptyBucketImpl = (BreakPlaceFillEmptyImpl<ActionResult>) (isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase) -> {
+
+                var stackInHand = player.getStackInHand(hand);
+
+                var didPlayerTryToFireATNT = false;
+
+                if (stackInHand.isOf(Items.FLINT_AND_STEEL)) {
+                    var block = world.getBlockState(hitResult.getBlockPos()).getBlock();
+                    if (block instanceof TntBlock)
+                        didPlayerTryToFireATNT = true;
+                }
+
+                // If the player is inside an enemy base
+                if (isPlayerInAnEnemyBase) {
+                    if (didPlayerTryToFireATNT) {
+                        if (!GameUtils.areAssaultEnabled(timeline.timelineData.getDay())) {
+                            return ActionResult.FAIL;
+                        }
                     }
                     return ActionResult.PASS;
                 }
@@ -267,10 +328,12 @@ public class FKGame {
                     return ActionResult.PASS;
                 }
 
-                // A player can place blocks outside his base, except if it is near another base (except TNT)
+                // A player can empty bucket outside his base, except if it is near another base
                 if (isPlayerCloseToAnEnemyBase) {
-                    if (!placedItemStack.isOf(Items.TNT)) {
-                        return ActionResult.FAIL;
+                    if (didPlayerTryToFireATNT) {
+                        if (!GameUtils.areAssaultEnabled(timeline.timelineData.getDay())) {
+                            return ActionResult.FAIL;
+                        }
                     }
                     return ActionResult.PASS;
                 }
@@ -281,10 +344,32 @@ public class FKGame {
             };
 
             var blockPos = hitResult.getBlockPos();
-            return cancelPlayerFromBreakingOrPlacingBlocks(player, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), breakPlace);
+            return FKGameEvents.this.iDontKnowTheNameOfThisMethod(player, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), emptyBucketImpl);
         }
 
-        private <T> T cancelPlayerFromBreakingOrPlacingBlocks(PlayerEntity player, Vec3d blockPos, BreakPlaceImpl<T> breakPlace) {
+        private ActionResult cancelPlayerPvP(PlayerEntity player, World world, Hand hand, Entity entity, @Nullable EntityHitResult hitResult) {
+            if (!GameUtils.isGameStateRUNNING()) return ActionResult.PASS;
+
+            if (entity instanceof PlayerEntity)
+                if (!GameUtils.isPvPEnabled(timeline.timelineData.getDay()))
+                    return ActionResult.FAIL;
+            return ActionResult.PASS;
+        }
+
+        private ActionResult cancelPlayerFromEnteringInPortal(ServerPlayerEntity player, Identifier dimensionId) {
+
+            if (dimensionId == DimensionType.THE_NETHER_ID) {
+                if (!GameUtils.isNetherEnabled(timeline.timelineData.getDay()))
+                    return ActionResult.FAIL;
+            } else if (dimensionId == DimensionType.THE_END_ID) {
+                if (!GameUtils.isEndEnabled(timeline.timelineData.getDay()))
+                    return ActionResult.FAIL;
+            }
+
+            return ActionResult.PASS;
+        }
+
+        private <T> T iDontKnowTheNameOfThisMethod(PlayerEntity player, Vec3d blockPos, BreakPlaceFillEmptyImpl<T> breakPlace) {
 
             var isPlayerInHisOwnBase = false;
 
@@ -304,13 +389,13 @@ public class FKGame {
 
                 var isPlayerCloseToABase = false;
 
-                var proximitySquare = new Square((short) (baseSquare.getSize() + 5), baseSquare.getX(), baseSquare.getY(), baseSquare.getZ());
-                if (Utils.isPlayerInsideArea(proximitySquare, blockPos)) {
+                var proximitySquare = new Cube((short) (baseSquare.getSize() + 5), baseSquare.getNumberOfBlocksDown() + 5, baseSquare.getNumberOfBlocksUp() + 5, baseSquare.getX(), baseSquare.getY(), baseSquare.getZ());
+                if (Utils.isPlayerInsideCube(proximitySquare, blockPos)) {
                     isPlayerCloseToABase = true;
                 }
 
                 // If player is inside a base
-                if (Utils.isPlayerInsideArea(baseSquare, blockPos)) {
+                if (Utils.isPlayerInsideCube(baseSquare, blockPos)) {
 
                     // And this base is not his own
                     if (!isBaseOfPlayer) {
@@ -336,7 +421,7 @@ public class FKGame {
 
             }
 
-            return breakPlace.breakOrPlaceBlocksEventImpl(isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase);
+            return breakPlace.impl(isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase);
         }
 
     }
@@ -344,37 +429,40 @@ public class FKGame {
     class PauseEvents {
 
         private ActionResult stopThePlayersFromMoving(PlayerMoveCallback.MoveData moveData, ServerPlayerEntity player) {
-            if (FK.GAME_STATE == FK.GameState.PAUSED) {
-                for (var entry : playerPositionWhenPaused.entrySet()) {
-                    var fkPlayer = server.getPlayerManager().getPlayer(UUID.fromString(entry.getKey()));
-                    if (fkPlayer != null) { // If fkPlayer is null, this is because it is not connected
-                        var pos = entry.getValue();
-                        var square = new Square((short) 1, pos.x, pos.y, pos.z); // The area where the player can move
+            if (!GameUtils.isGameStatePAUSE()) return ActionResult.PASS;
 
-                        if (Utils.didPlayerTryToLeaveAnArea(square, player))
-                            return ActionResult.FAIL;
-                    }
+            if(player.hasPermissionLevel(4))return ActionResult.PASS; // OP Player can move anymore
+
+            for (var entry : playerPositionWhenPaused.entrySet()) {
+                var fkPlayer = server.getPlayerManager().getPlayer(UUID.fromString(entry.getKey()));
+                if (fkPlayer != null) { // If fkPlayer is null, this is because it is not connected
+                    var pos = entry.getValue();
+                    var square = new Cube((short) 1,3,3, pos.x, pos.y, pos.z); // The area where the player can move
+
+                    if (Utils.didPlayerTryToLeaveAnArea(square, player))
+                        return ActionResult.FAIL;
                 }
             }
+
             return ActionResult.PASS;
         }
 
         private ActionResult stopEntitiesFromMoving(Entity entity, MovementType movementType, Vec3d movement) {
-            if (FK.GAME_STATE == FK.GameState.PAUSED)
-                return ActionResult.FAIL;
-            return ActionResult.PASS;
+            if (!GameUtils.isGameStatePAUSE()) return ActionResult.PASS;
+
+
+
+            return ActionResult.FAIL;
         }
 
         private ActionResult onPlayerDamage(DamageSource source, float amount) {
-            if (GAME_STATE == FK.GameState.PAUSED) return ActionResult.FAIL;
-            return ActionResult.PASS;
+            if (!GameUtils.isGameStatePAUSE()) return ActionResult.PASS;
+            return ActionResult.FAIL;
         }
 
         private ActionResult cancelTimeOfDayToBeingUpdated(long time) {
-            if (FK.GAME_STATE == FK.GameState.PAUSED) {
-                return ActionResult.FAIL;
-            }
-            return ActionResult.PASS;
+            if (!GameUtils.isGameStatePAUSE()) return ActionResult.PASS;
+            return ActionResult.FAIL;
         }
 
     }

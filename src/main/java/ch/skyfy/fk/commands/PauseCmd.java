@@ -3,6 +3,8 @@ package ch.skyfy.fk.commands;
 import ch.skyfy.fk.FK;
 import ch.skyfy.fk.logic.FKGame;
 import ch.skyfy.fk.logic.PreFKGame;
+import ch.skyfy.fk.logic.data.AllData;
+import ch.skyfy.fk.logic.data.FKGameData;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -24,6 +26,8 @@ public class PauseCmd implements Command<ServerCommandSource> {
 
     private final AtomicReference<FKGame> fkGameRef;
 
+    private final FKGameData fkGameData = AllData.FK_GAME_DATA.config;
+
     public PauseCmd(PreFKGame preFKGame, AtomicReference<FKGame> fkGameRef) {
         this.preFKGame = preFKGame;
         this.fkGameRef = fkGameRef;
@@ -35,7 +39,12 @@ public class PauseCmd implements Command<ServerCommandSource> {
         var source = context.getSource();
         var player = source.getPlayer();
 
-        switch (FK.GAME_STATE){
+        if (!player.hasPermissionLevel(4)) {
+            player.sendMessage(Text.of("You dont have required privileges to use this command"), false);
+            return 0;
+        }
+
+        switch (fkGameData.getGameState()){
             case NOT_STARTED -> player.sendMessage(new LiteralText("The game cannot be paused because it is not started !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
             case PAUSED -> player.sendMessage(new LiteralText("The game is already paused !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
             case RUNNING -> {
@@ -44,7 +53,7 @@ public class PauseCmd implements Command<ServerCommandSource> {
 
                 // Normally the fkGame should not be null, but you never know
                 if(fkGameRef.get() != null){
-                    FK.GAME_STATE = FK.GameState.PAUSED;
+                    fkGameData.setGameState(FK.GameState.PAUSED);
                     fkGameRef.get().pause();
                 }
             }

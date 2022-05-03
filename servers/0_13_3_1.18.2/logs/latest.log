@@ -1,5 +1,5 @@
-[20:17:08] [main/INFO]: Loading Minecraft 1.18.2 with Fabric Loader 0.13.3
-[20:17:09] [main/INFO]: Loading 46 mods:
+[12:31:26] [main/INFO]: Loading Minecraft 1.18.2 with Fabric Loader 0.13.3
+[12:31:27] [main/INFO]: Loading 47 mods:
 	- clumps 8.0.0+8
 	- com_velocitypowered_velocity-native 1.1.0-SNAPSHOT via krypton
 	- fabric 0.51.1+1.18.2
@@ -46,122 +46,49 @@
 	- player_events 2.2.4
 	- player_events_api 2.2.4 via player_events
 	- starlight 1.0.2+fabric.89b8d9f
-[20:17:09] [main/INFO]: SpongePowered MIXIN Subsystem Version=0.8.5 Source=file:/C:/Users/colin/Desktop/FK/servers/0_13_3_1.18.2/libraries/net/fabricmc/sponge-mixin/0.11.2+mixin.0.8.5/sponge-mixin-0.11.2+mixin.0.8.5.jar Service=Knot/Fabric Env=SERVER
-[20:17:09] [main/INFO]: Compatibility level set to JAVA_17
-[20:17:09] [main/INFO]: Loaded configuration file for Lithium: 100 options available, 2 override(s) found
-[20:17:09] [main/WARN]: Force-disabling mixin 'alloc.blockstate.StateMixin' as rule 'mixin.alloc.blockstate' (added by mods [ferritecore]) disables it and children
-[20:17:09] [main/WARN]: Force-disabling mixin 'world.player_chunk_tick.ThreadedAnvilChunkStorageMixin' as rule 'mixin.world.player_chunk_tick' (added by mods [krypton]) disables it and children
-[20:17:10] [main/INFO]: fk.mixins.json:ItemInvoker->@Invoker[METHOD_PROXY]::invokeRaycast(Lnet/minecraft/class_1937;Lnet/minecraft/class_1657;Lnet/minecraft/class_3959$class_242;)Lnet/minecraft/class_3965; should be static as its target is
-[20:17:13] [main/INFO]: Compression will use Java 11, encryption will use Java
-[20:17:13] [main/INFO]: ch.skyfy.fk.config.Configs has been loaded
-[20:17:13] [main/INFO]: ALL CONFIG HAVE BEEN LOADED WITH SUCCESS
-[20:17:13] [main/INFO]: Krypton is now accelerating your Minecraft server's networking stack ?
-[20:17:13] [main/INFO]: Environment: authHost='https://authserver.mojang.com', accountsHost='https://api.mojang.com', sessionHost='https://sessionserver.mojang.com', servicesHost='https://api.minecraftservices.com', name='PROD'
-[20:17:14] [main/INFO]: [fabric-registry-sync] Loaded registry data [file 1/4]
-[20:17:14] [main/WARN]: Ambiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
-[20:17:14] [main/WARN]: Ambiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
-[20:17:14] [main/WARN]: Ambiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
-[20:17:14] [main/WARN]: Ambiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
-[20:17:14] [main/WARN]: Ambiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
-[20:17:14] [Worker-Main-4/INFO]: Loaded 7 recipes
-[20:17:15] [Worker-Main-4/INFO]: Loaded 1141 advancements
-[20:17:15] [main/INFO]: Applied 0 biome modifications to 0 of 61 new biomes in 2.099 ms
-[20:17:15] [Server thread/INFO]: Starting minecraft server version 1.18.2
-[20:17:15] [Server thread/INFO]: Loading properties
-[20:17:15] [Server thread/INFO]: Default game type: SURVIVAL
-[20:17:15] [Server thread/INFO]: Generating keypair
-[20:17:16] [Server thread/INFO]: Starting Minecraft server on *:25565
-[20:17:16] [Server thread/INFO]: Using default channel type
-[20:17:16] [Server thread/INFO]: Preparing level "Optimized_World"
-[20:17:16] [Server thread/INFO]: Preparing start region for dimension minecraft:overworld
-[20:17:16] [Worker-Main-16/INFO]: Preparing spawn area: 0%
-[20:17:16] [Worker-Main-23/INFO]: Preparing spawn area: 0%
-[20:17:17] [Worker-Main-6/INFO]: Preparing spawn area: 4%
-[20:17:17] [Worker-Main-4/INFO]: Preparing spawn area: 52%
-[20:17:18] [Server thread/INFO]: Time elapsed: 1688 ms
-[20:17:18] [Server thread/INFO]: Done (1.812s)! For help, type "help"
-[20:17:19] [User Authenticator #1/INFO]: UUID of player Skyfy16 is ebb5c153-3f6f-4fb6-9062-20ac564e7490
-[20:17:20] [Server thread/INFO]: Skyfy16[/127.0.0.1:59463] logged in with entity id 1 at (-7.288787117739518, -33.0, 2.41869879523024)
-[20:17:20] [Server thread/INFO]: Skyfy16 joined the game
-[20:17:20] [Server thread/WARN]: @Redirect conflict. Skipping lithium.mixins.json:alloc.entity_tracker.EntityTrackerMixin->@Redirect::useFasterCollection()Ljava/util/Set; from mod lithium with priority 1000, already redirected by krypton.mixins.json:shared.network.microopt.TacsTrackedEntityMixin->@Redirect::construct$useFastutil()Ljava/util/Set; from mod krypton with priority 1000
-[20:17:25] [Server thread/INFO]: The game begins !
-[20:17:27] [Server thread/INFO]: [STDOUT]: Player is in the wild
-[20:17:27] [Server thread/INFO]: [STDOUT]: target fluid is not EMPTY FLUID
-[20:17:27] [Server thread/INFO]: [STDOUT]: sa marche
-[20:17:27] [Server thread/INFO]: [STDOUT]: LavaFluid -> cancelled
-[20:17:29] [Server thread/INFO]: [STDOUT]: Player is in the wild
-[20:17:29] [Server thread/INFO]: [STDOUT]: target fluid is not EMPTY FLUID
-[20:17:29] [Server thread/INFO]: [STDOUT]: sa marche
-[20:17:29] [Server thread/INFO]: [STDOUT]: LavaFluid -> cancelled
-[20:17:29] [Server thread/INFO]: [STDOUT]: Player is in the wild
-[20:17:29] [Server thread/INFO]: [STDOUT]: target fluid is not EMPTY FLUID
-[20:17:29] [Server thread/INFO]: [STDOUT]: sa marche
-[20:17:29] [Server thread/INFO]: [STDOUT]: LavaFluid -> cancelled
-[20:17:29] [Server thread/INFO]: [STDOUT]: Player is in the wild
-[20:17:29] [Server thread/INFO]: [STDOUT]: target fluid is not EMPTY FLUID
-[20:17:29] [Server thread/INFO]: [STDOUT]: sa marche
-[20:17:29] [Server thread/INFO]: [STDOUT]: LavaFluid -> cancelled
-[20:17:30] [Server thread/INFO]: [STDOUT]: Player is in the wild
-[20:17:30] [Server thread/INFO]: [STDOUT]: target fluid is not EMPTY FLUID
-[20:17:30] [Server thread/INFO]: [STDOUT]: sa marche
-[20:17:30] [Server thread/INFO]: [STDOUT]: LavaFluid -> cancelled
-[20:17:31] [Server thread/INFO]: [STDOUT]: Player is in the wild
-[20:17:31] [Server thread/INFO]: [STDOUT]: target fluid is not EMPTY FLUID
-[20:17:31] [Server thread/INFO]: [STDOUT]: sa marche
-[20:17:31] [Server thread/INFO]: [STDOUT]: LavaFluid -> cancelled
-[20:17:31] [Server thread/INFO]: [STDOUT]: Player is in the wild
-[20:17:31] [Server thread/INFO]: [STDOUT]: target fluid is not EMPTY FLUID
-[20:17:31] [Server thread/INFO]: [STDOUT]: sa marche
-[20:17:31] [Server thread/INFO]: [STDOUT]: LavaFluid -> cancelled
-[20:17:31] [Server thread/INFO]: [STDOUT]: Player is in the wild
-[20:17:33] [Server thread/INFO]: [STDOUT]: Player is in the wild
-[20:17:33] [Server thread/INFO]: [STDOUT]: target fluid is not EMPTY FLUID
-[20:17:33] [Server thread/INFO]: [STDOUT]: sa marche
-[20:17:33] [Server thread/INFO]: [STDOUT]: LavaFluid -> cancelled
-[20:17:33] [Server thread/INFO]: [STDOUT]: Player is in the wild
-[20:17:34] [Server thread/INFO]: [STDOUT]: Player is in the wild
-[20:17:34] [Server thread/INFO]: [STDOUT]: target fluid is not EMPTY FLUID
-[20:17:34] [Server thread/INFO]: [STDOUT]: sa marche
-[20:17:34] [Server thread/INFO]: [STDOUT]: LavaFluid -> cancelled
-[20:17:35] [Server thread/INFO]: [STDOUT]: Player is in the wild
-[20:17:35] [Server thread/INFO]: [STDOUT]: target fluid is not EMPTY FLUID
-[20:17:35] [Server thread/INFO]: [STDOUT]: sa marche
-[20:17:35] [Server thread/INFO]: [STDOUT]: LavaFluid -> cancelled
-[20:17:36] [Server thread/INFO]: [STDOUT]: Player is in the wild
-[20:17:36] [Server thread/INFO]: [STDOUT]: target fluid is not EMPTY FLUID
-[20:17:36] [Server thread/INFO]: [STDOUT]: sa marche
-[20:17:36] [Server thread/INFO]: [STDOUT]: LavaFluid -> cancelled
-[20:17:36] [Server thread/INFO]: [STDOUT]: Player is in the wild
-[20:17:36] [Server thread/INFO]: [STDOUT]: target fluid is not EMPTY FLUID
-[20:17:36] [Server thread/INFO]: [STDOUT]: sa marche
-[20:17:36] [Server thread/INFO]: [STDOUT]: LavaFluid -> cancelled
-[20:17:36] [Server thread/INFO]: [STDOUT]: Player is in the wild
-[20:17:36] [Server thread/INFO]: [STDOUT]: target fluid is not EMPTY FLUID
-[20:17:36] [Server thread/INFO]: [STDOUT]: sa marche
-[20:17:36] [Server thread/INFO]: [STDOUT]: LavaFluid -> cancelled
-[20:17:37] [Server thread/INFO]: [STDOUT]: Player is in the wild
-[20:17:37] [Server thread/INFO]: [STDOUT]: target fluid is not EMPTY FLUID
-[20:17:37] [Server thread/INFO]: [STDOUT]: sa marche
-[20:17:37] [Server thread/INFO]: [STDOUT]: LavaFluid -> cancelled
-[20:17:37] [Server thread/INFO]: [STDOUT]: Player is in the wild
-[20:17:37] [Server thread/INFO]: [STDOUT]: target fluid is not EMPTY FLUID
-[20:17:37] [Server thread/INFO]: [STDOUT]: sa marche
-[20:17:37] [Server thread/INFO]: [STDOUT]: LavaFluid -> cancelled
-[20:17:37] [Server thread/INFO]: [STDOUT]: Player is in the wild
-[20:17:37] [Server thread/INFO]: [STDOUT]: target fluid is not EMPTY FLUID
-[20:17:37] [Server thread/INFO]: [STDOUT]: sa marche
-[20:17:37] [Server thread/INFO]: [STDOUT]: LavaFluid -> cancelled
-[20:17:37] [Server thread/INFO]: [STDOUT]: Player is in the wild
-[20:17:37] [Server thread/INFO]: [STDOUT]: target fluid is not EMPTY FLUID
-[20:17:37] [Server thread/INFO]: [STDOUT]: sa marche
-[20:17:37] [Server thread/INFO]: [STDOUT]: LavaFluid -> cancelled
-[20:17:37] [Server thread/INFO]: [STDOUT]: Player is in the wild
-[20:17:37] [Server thread/INFO]: [STDOUT]: target fluid is not EMPTY FLUID
-[20:17:37] [Server thread/INFO]: [STDOUT]: sa marche
-[20:17:37] [Server thread/INFO]: [STDOUT]: LavaFluid -> cancelled
-[20:17:40] [Server thread/INFO]: [STDOUT]: Player is in the wild
-[20:17:40] [Server thread/INFO]: [STDOUT]: Player is in the wild
-[20:17:41] [Server thread/INFO]: [STDOUT]: Player is in the wild
-[20:17:42] [Server thread/INFO]: [STDOUT]: Player is in the wild
-[20:17:44] [Server thread/INFO]: [STDOUT]: Player is in the wild
-[20:17:44] [Server thread/INFO]: [STDOUT]: Player is in the wild
+	- worldedit 7.2.10+1742f98
+[12:31:27] [main/INFO]: SpongePowered MIXIN Subsystem Version=0.8.5 Source=file:/C:/Users/colin/Desktop/FK/servers/0_13_3_1.18.2/libraries/net/fabricmc/sponge-mixin/0.11.2+mixin.0.8.5/sponge-mixin-0.11.2+mixin.0.8.5.jar Service=Knot/Fabric Env=SERVER
+[12:31:27] [main/INFO]: Compatibility level set to JAVA_17
+[12:31:27] [main/INFO]: Loaded configuration file for Lithium: 100 options available, 2 override(s) found
+[12:31:27] [main/WARN]: Force-disabling mixin 'alloc.blockstate.StateMixin' as rule 'mixin.alloc.blockstate' (added by mods [ferritecore]) disables it and children
+[12:31:27] [main/WARN]: Force-disabling mixin 'world.player_chunk_tick.ThreadedAnvilChunkStorageMixin' as rule 'mixin.world.player_chunk_tick' (added by mods [krypton]) disables it and children
+[12:31:28] [main/INFO]: fk.mixins.json:ItemInvoker->@Invoker[METHOD_PROXY]::invokeRaycast(Lnet/minecraft/class_1937;Lnet/minecraft/class_1657;Lnet/minecraft/class_3959$class_242;)Lnet/minecraft/class_3965; should be static as its target is
+[12:31:31] [main/INFO]: Compression will use Java 11, encryption will use Java
+[12:31:32] [main/INFO]: Got request to register class com.sk89q.worldedit.fabric.FabricPlatform with WorldEdit [com.sk89q.worldedit.extension.platform.PlatformManager@4d583069]
+[12:31:32] [main/INFO]: WorldEdit for Fabric (version 7.2.10+1742f98) is loaded
+[12:31:32] [main/INFO]: ALL CONFIG HAVE BEEN LOADED WITH SUCCESS
+[12:31:32] [main/INFO]: ch.skyfy.fk.config.Configs has been loaded
+[12:31:32] [main/INFO]: ALL CONFIG HAVE BEEN LOADED WITH SUCCESS
+[12:31:32] [main/INFO]: [STDOUT]: game was running at restart, game is now paused
+[12:31:32] [main/INFO]: Krypton is now accelerating your Minecraft server's networking stack ?
+[12:31:32] [main/INFO]: Environment: authHost='https://authserver.mojang.com', accountsHost='https://api.mojang.com', sessionHost='https://sessionserver.mojang.com', servicesHost='https://api.minecraftservices.com', name='PROD'
+[12:31:32] [main/INFO]: [fabric-registry-sync] Loaded registry data [file 1/4]
+[12:31:33] [main/INFO]: Registering commands with com.sk89q.worldedit.fabric.FabricPlatform
+[12:31:33] [main/WARN]: Ambiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[12:31:33] [main/WARN]: Ambiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
+[12:31:33] [main/WARN]: Ambiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[12:31:33] [main/WARN]: Ambiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[12:31:33] [main/WARN]: Ambiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[12:31:33] [Worker-Main-14/INFO]: Loaded 7 recipes
+[12:31:33] [Worker-Main-14/INFO]: Loaded 1141 advancements
+[12:31:34] [main/INFO]: Applied 0 biome modifications to 0 of 61 new biomes in 1.421 ms
+[12:31:34] [Server thread/INFO]: Starting minecraft server version 1.18.2
+[12:31:34] [Server thread/INFO]: Loading properties
+[12:31:34] [Server thread/INFO]: Default game type: SURVIVAL
+[12:31:34] [Server thread/INFO]: Generating keypair
+[12:31:34] [Server thread/INFO]: Starting Minecraft server on *:25565
+[12:31:34] [Server thread/INFO]: Using default channel type
+[12:31:34] [Server thread/INFO]: Preparing level "Optimized_World"
+[12:31:34] [Server thread/INFO]: Preparing start region for dimension minecraft:overworld
+[12:31:35] [Worker-Main-3/INFO]: Preparing spawn area: 0%
+[12:31:35] [Worker-Main-3/INFO]: Preparing spawn area: 0%
+[12:31:35] [Worker-Main-15/INFO]: Preparing spawn area: 7%
+[12:31:36] [Worker-Main-31/INFO]: Preparing spawn area: 72%
+[12:31:36] [Server thread/INFO]: Time elapsed: 1672 ms
+[12:31:36] [Server thread/INFO]: Done (1.780s)! For help, type "help"
+[12:32:24] [User Authenticator #1/INFO]: UUID of player Skyfy16 is ebb5c153-3f6f-4fb6-9062-20ac564e7490
+[12:32:24] [Server thread/INFO]: Skyfy16[/127.0.0.1:58520] logged in with entity id 1 at (-11.155128223334211, -18.508008246837534, -10.240365953819904)
+[12:32:24] [Server thread/INFO]: Skyfy16 joined the game
+[12:32:24] [Server thread/WARN]: @Redirect conflict. Skipping lithium.mixins.json:alloc.entity_tracker.EntityTrackerMixin->@Redirect::useFasterCollection()Ljava/util/Set; from mod lithium with priority 1000, already redirected by krypton.mixins.json:shared.network.microopt.TacsTrackedEntityMixin->@Redirect::construct$useFastutil()Ljava/util/Set; from mod krypton with priority 1000
+[12:32:24] [Server thread/INFO]: [STDOUT]: first player joined and game is paused
+[12:32:45] [Server thread/INFO]: The game has been resumed

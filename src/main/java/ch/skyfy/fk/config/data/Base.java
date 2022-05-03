@@ -5,13 +5,13 @@ public class Base {
 
     private String name;
 
-    private Square square;
+    private Cube cube;
 
     public Base() {}
 
-    public Base(String name, Square square) {
+    public Base(String name, Cube cube) {
         this.name = name;
-        this.square = square;
+        this.cube = cube;
     }
 
     public String getName() {
@@ -22,11 +22,11 @@ public class Base {
         this.name = name;
     }
 
-    public Square getSquare() {
-        return square;
+    public Cube getSquare() {
+        return cube;
     }
 
-    public void setSquare(Square square) {
-        this.square = square;
+    public void setSquare(Cube cube) {
+        this.cube = cube;
     }
 }

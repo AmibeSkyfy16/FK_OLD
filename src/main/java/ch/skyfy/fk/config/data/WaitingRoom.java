@@ -2,23 +2,23 @@ package ch.skyfy.fk.config.data;
 
 public class WaitingRoom {
 
-    private Square square;
+    private Cube cube;
 
     private SpawnLocation spawnLocation;
 
     public WaitingRoom() {}
 
-    public WaitingRoom(Square square, SpawnLocation spawnLocation) {
-        this.square = square;
+    public WaitingRoom(Cube cube, SpawnLocation spawnLocation) {
+        this.cube = cube;
         this.spawnLocation = spawnLocation;
     }
 
-    public Square getSquare() {
-        return square;
+    public Cube getSquare() {
+        return cube;
     }
 
-    public void setSquare(Square square) {
-        this.square = square;
+    public void setSquare(Cube cube) {
+        this.cube = cube;
     }
 
     public SpawnLocation getSpawnLocation() {

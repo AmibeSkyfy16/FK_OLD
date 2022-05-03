@@ -1,7 +1,7 @@
 package ch.skyfy16.fk;
 
 import ch.skyfy.fk.config.data.SpawnLocation;
-import ch.skyfy.fk.config.data.Square;
+import ch.skyfy.fk.config.data.Cube;
 import ch.skyfy.fk.config.data.WaitingRoom;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
@@ -15,7 +15,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class Tests {
 
@@ -45,7 +44,7 @@ public class Tests {
         var myConfigType = TypeToken.of(WaitingRoom.class).getType();
 
         var waitingRoom = new WaitingRoom(
-                new Square((short) 5, 0, -33, 0),
+                new Cube((short) 5, 0, -33, 0),
                 new SpawnLocation("minecraft:overworld", 0, -33, 0, 69, 69)
         );
 

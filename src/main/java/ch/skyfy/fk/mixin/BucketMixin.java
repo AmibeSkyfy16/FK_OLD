@@ -42,7 +42,7 @@ public class BucketMixin {
 
         if(!(targetFluid instanceof EmptyFluid)){ // If there is lava or water fluid on the ground
             if(fluid instanceof EmptyFluid){ // And the player's bucket is empty
-                var result = BucketFillEvent.EVENT.invoker().onUse(world, user, hand, targetFluid, bucketItem);
+                var result = BucketFillEvent.EVENT.invoker().onUse(world, user, hand, targetFluid, bucketItem, blockHitResult);
                 if(result.getResult() == ActionResult.FAIL){
                     resultCallbackInfoReturnable.setReturnValue(result);
                     resultCallbackInfoReturnable.cancel();
@@ -50,7 +50,7 @@ public class BucketMixin {
             }
         }else{
             if(!(fluid instanceof EmptyFluid)){ // And the player's bucket is not empty
-                var result = BucketEmptyEvent.EVENT.invoker().onUse(world, user, hand, fluid, bucketItem);
+                var result = BucketEmptyEvent.EVENT.invoker().onUse(world, user, hand, fluid, bucketItem, blockHitResult);
                 if(result.getResult() == ActionResult.FAIL){
                     resultCallbackInfoReturnable.setReturnValue(result);
                     resultCallbackInfoReturnable.cancel();

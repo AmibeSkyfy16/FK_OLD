@@ -4,6 +4,8 @@ import ch.skyfy.fk.FK;
 import ch.skyfy.fk.logic.FKGame;
 import ch.skyfy.fk.logic.GameUtils;
 import ch.skyfy.fk.logic.PreFKGame;
+import ch.skyfy.fk.logic.data.AllData;
+import ch.skyfy.fk.logic.data.FKGameData;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -25,6 +27,8 @@ public class StartCmd implements Command<ServerCommandSource> {
 
     private final AtomicReference<FKGame> fkGameRef;
 
+    private final FKGameData fkGameData = AllData.FK_GAME_DATA.config;
+
     public StartCmd(PreFKGame preFKGame, AtomicReference<FKGame> fkGameRef) {
         this.preFKGame = preFKGame;
         this.fkGameRef = fkGameRef;
@@ -36,28 +40,34 @@ public class StartCmd implements Command<ServerCommandSource> {
         var source = context.getSource();
         var player = source.getPlayer();
 
-        switch (FK.GAME_STATE){
-            case PAUSED -> player.sendMessage(new LiteralText("The game cannot be started because it is paused !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
-            case RUNNING -> player.sendMessage(new LiteralText("The game has already started !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
-            case NOT_STARTED -> {
+        if (!player.hasPermissionLevel(4)) {
+            player.sendMessage(Text.of("You dont have required privileges to use this command"), false);
+            return 0;
+        }
 
-                if (!player.hasPermissionLevel(4)) {
-                    player.sendMessage(Text.of("You dont have required privileges to start the game"), false);
+        switch (fkGameData.getGameState()){
+            case PAUSED -> player.sendMessage(new LiteralText("The game cannot be started because it is paused !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
+            case RUNNING -> {
+
+                // If the server was restart and the state was RUNNING, we have to create a new FKGame object
+                if(fkGameRef.get() == null){
+                    fkGameRef.set(new FKGame(source.getServer()));
                     return 0;
                 }
 
+                player.sendMessage(new LiteralText("The game has already started !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
+            }
+            case NOT_STARTED -> {
+
+
                 // TODO UNCOMMENT
-//                var missingPlayers = GameUtils.ArePlayersReady(source.getServer().getPlayerManager().getPlayerList());
-//                if (!missingPlayers.isEmpty()) {
-//                    var sb = new StringBuilder();
-//                    missingPlayers.forEach(missingPlayer -> sb.append(missingPlayer).append("\n"));
-//                    player.sendMessage(Text.of("the game cannot be started because the following players are missing\n" + sb), false);
-//                    return 0;
+//                if(GameUtils.areMissingPlayers(source.getServer().getPlayerManager().getPlayerList())){
+//                    GameUtils.sendMissingPlayersMessage(player, source.getServer().getPlayerManager().getPlayerList());
 //                }
 
                 source.getServer().getPlayerManager().broadcast(new LiteralText("The game begins !").setStyle(Style.EMPTY.withColor(Formatting.GREEN)), MessageType.CHAT, NIL_UUID);
 
-                FK.GAME_STATE = FK.GameState.RUNNING;
+                fkGameData.setGameState(FK.GameState.RUNNING);
 
                 fkGameRef.set(new FKGame(source.getServer()));
                 fkGameRef.get().start();

@@ -9,13 +9,14 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.world.World;
 
 public interface BucketFillEvent {
     Event<BucketFillEvent> EVENT = EventFactory.createArrayBacked(BucketFillEvent.class,
-            (listeners) -> (world, player, hand, fillFluid, bucketItem) -> {
+            (listeners) -> (world, player, hand, fillFluid, bucketItem, blockHitResult) -> {
                 for (BucketFillEvent listener : listeners) {
-                    var result = listener.onUse(world, player, hand, fillFluid, bucketItem);
+                    var result = listener.onUse(world, player, hand, fillFluid, bucketItem, blockHitResult);
                     if (result.getResult() != ActionResult.PASS) {
                         return result;
                     }
@@ -23,5 +24,5 @@ public interface BucketFillEvent {
                 return TypedActionResult.pass(ItemStack.EMPTY);
             });
 
-    TypedActionResult<ItemStack> onUse(World world, PlayerEntity player, Hand hand, Fluid fillFluid, BucketItem bucketItem);
+    TypedActionResult<ItemStack> onUse(World world, PlayerEntity player, Hand hand, Fluid fillFluid, BucketItem bucketItem, BlockHitResult blockHitResult);
 }

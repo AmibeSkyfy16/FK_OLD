@@ -2,6 +2,7 @@ package ch.skyfy.fk.commands;
 
 import ch.skyfy.fk.logic.FKGame;
 import ch.skyfy.fk.logic.PreFKGame;
+import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -31,5 +32,13 @@ public class CommandManager {
             dispatcher.register(net.minecraft.server.command.CommandManager.literal("FKPause").executes(pauseCmd));
             dispatcher.register(net.minecraft.server.command.CommandManager.literal("FKResume").executes(resumeCmd));
         });
+    }
+
+    public StartCmd getStartCmd() {
+        return startCmd;
+    }
+
+    public AtomicReference<FKGame> getFkGameRef() {
+        return fkGameRef;
     }
 }

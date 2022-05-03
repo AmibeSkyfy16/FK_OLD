@@ -5,6 +5,8 @@ import ch.skyfy.fk.ScoreboardManager;
 import ch.skyfy.fk.config.Configs;
 import ch.skyfy.fk.events.PlayerDamageCallback;
 import ch.skyfy.fk.events.PlayerMoveCallback;
+import ch.skyfy.fk.logic.data.AllData;
+import com.mojang.brigadier.context.CommandContextBuilder;
 import me.bymartrixx.playerevents.api.event.PlayerJoinCallback;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.server.MinecraftServer;
@@ -14,7 +16,6 @@ import net.minecraft.util.Formatting;
 
 import java.util.stream.StreamSupport;
 
-import static ch.skyfy.fk.FK.GAME_STATE;
 
 @SuppressWarnings({"ConstantConditions", "FieldCanBeLocal"})
 public class PreFKGame {
@@ -23,11 +24,28 @@ public class PreFKGame {
 
     public PreFKGame() {
         this.commandManager = new ch.skyfy.fk.commands.CommandManager(this);
+
+        if(GameUtils.isGameStateRUNNING()){
+            System.out.println("game was running at restart, game is now paused");
+            AllData.FK_GAME_DATA.config.setGameState(FK.GameState.PAUSED);
+        }
     }
 
     public void registerAll() {
 
         commandManager.registerCommands();
+
+        PlayerJoinCallback.EVENT.register((player, server) -> {
+            if(server.getPlayerManager().getPlayerList().size() == 1){
+
+                if(GameUtils.isGameStatePAUSE()) {
+                    System.out.println("first player joined and game is paused");
+                    var fkGame = new FKGame(server);
+                    commandManager.getFkGameRef().set(fkGame);
+                }
+
+            }
+        });
 
         PlayerJoinCallback.EVENT.register(this::teleportPlayerToWaitingRoom);
         PlayerDamageCallback.EVENT.register(this::onPlayerDamage);
@@ -36,7 +54,8 @@ public class PreFKGame {
 
     @SuppressWarnings("ConstantConditions")
     private void teleportPlayerToWaitingRoom(ServerPlayerEntity player, MinecraftServer server) {
-        if (GAME_STATE != FK.GameState.NOT_STARTED) return;
+        if(!GameUtils.isGameStateNOT_STARTED())return;
+
         var spawnLoc = Configs.FK_CONFIG.config.waitingRoom.getSpawnLocation();
 
         StreamSupport.stream(server.getWorlds().spliterator(), false)
@@ -78,15 +97,15 @@ public class PreFKGame {
     }
 
     private ActionResult onPlayerDamage(DamageSource source, float amount) {
-        if (GAME_STATE == FK.GameState.NOT_STARTED) return ActionResult.FAIL;
-        return ActionResult.PASS;
+        if(!GameUtils.isGameStateNOT_STARTED())return ActionResult.PASS;
+        return ActionResult.FAIL;
     }
 
     /**
      * Prevents the player from leaving the waiting room
      */
     private ActionResult onPlayerMove(PlayerMoveCallback.MoveData moveData, ServerPlayerEntity player) {
-        if (GAME_STATE != FK.GameState.NOT_STARTED) return ActionResult.PASS;
+        if(!GameUtils.isGameStateNOT_STARTED())return ActionResult.PASS;
 
         var waitingRoom = Configs.FK_CONFIG.config.waitingRoom;
         var square = waitingRoom.getSquare();
