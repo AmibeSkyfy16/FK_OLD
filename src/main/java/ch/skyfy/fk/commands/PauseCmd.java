@@ -13,16 +13,19 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+
 import static net.minecraft.util.Util.NIL_UUID;
 
 public class PauseCmd implements Command<ServerCommandSource> {
 
-    private final FKGame fkGame;
+    private final AtomicReference<Optional<FKGame>> optFKGameRef;
 
     private final FKGameData fkGameData = AllData.FK_GAME_DATA.config;
 
-    public PauseCmd(final FKGame fkGame) {
-        this.fkGame = fkGame;
+    public PauseCmd(final AtomicReference<Optional<FKGame>> optFKGameRef) {
+        this.optFKGameRef = optFKGameRef;
     }
 
     @Override
@@ -46,7 +49,7 @@ public class PauseCmd implements Command<ServerCommandSource> {
                 source.getServer().getPlayerManager().broadcast(Text.of("The game has been paused"), MessageType.CHAT, NIL_UUID);
 
 
-                fkGame.pause();
+                optFKGameRef.get().ifPresent(FKGame::pause);
 
             }
         }

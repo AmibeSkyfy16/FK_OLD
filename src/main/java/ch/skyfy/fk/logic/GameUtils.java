@@ -2,19 +2,28 @@ package ch.skyfy.fk.logic;
 
 import ch.skyfy.fk.FK;
 import ch.skyfy.fk.config.Configs;
+import ch.skyfy.fk.config.data.Cube;
 import ch.skyfy.fk.config.data.FKTeam;
 import ch.skyfy.fk.logic.data.AllData;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "ConstantConditions"})
 public class GameUtils {
+
+    @FunctionalInterface
+    public interface WhereIsThePlayer<T> {
+        T impl(boolean isPlayerInHisOwnBase, boolean isPlayerInAnEnemyBase, boolean isPlayerCloseToHisOwnBase, boolean isPlayerCloseToAnEnemyBase);
+
+    }
 
     /**
      * If among the connected players, one is missing, the game is not started
@@ -96,6 +105,62 @@ public class GameUtils {
             player.sendMessage(Text.of("the game cannot be started/resumed because the following players are missing\n" + sb), false);
         }
     }
+
+    public static <T> T whereIsThePlayer(PlayerEntity player, Vec3d blockPos, WhereIsThePlayer<T> whereIsThePlayer) {
+
+        var isPlayerInHisOwnBase = false;
+
+        var isPlayerInAnEnemyBase = false;
+
+        // Is the player close to his own base, but not inside
+        var isPlayerCloseToHisOwnBase = false;
+
+        // Is the player close to an enemy base, but not inside
+        var isPlayerCloseToAnEnemyBase = false;
+
+        for (FKTeam team : Configs.BASES_CONFIG.config.teams) {
+            var baseSquare = team.getBase().getSquare();
+
+            // Is this base the base of the player who break the block ?
+            var isBaseOfPlayer = team.getPlayers().stream().anyMatch(fkPlayerName -> player.getName().asString().equals(fkPlayerName));
+
+            var isPlayerCloseToABase = false;
+
+            var proximitySquare = new Cube((short) (baseSquare.getSize() + 5), baseSquare.getNumberOfBlocksDown() + 5, baseSquare.getNumberOfBlocksUp() + 5, baseSquare.getX(), baseSquare.getY(), baseSquare.getZ());
+            if (Utils.isPlayerInsideCube(proximitySquare, blockPos)) {
+                isPlayerCloseToABase = true;
+            }
+
+            // If player is inside a base
+            if (Utils.isPlayerInsideCube(baseSquare, blockPos)) {
+
+                // And this base is not his own
+                if (!isBaseOfPlayer) {
+                    isPlayerInAnEnemyBase = true;
+                } else {
+                    isPlayerInHisOwnBase = true;
+                }
+
+            } else {
+
+                // If the player is close to a base, but not inside
+                if (isPlayerCloseToABase) {
+                    if (!isPlayerInHisOwnBase) {
+                        if (isBaseOfPlayer) isPlayerCloseToHisOwnBase = true;
+                        else isPlayerCloseToAnEnemyBase = true;
+                    } else if (!isPlayerInAnEnemyBase) {
+                        if (!isBaseOfPlayer) isPlayerCloseToAnEnemyBase = true;
+                        else isPlayerCloseToHisOwnBase = true;
+                    }
+                }
+
+            }
+
+        }
+
+        return whereIsThePlayer.impl(isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase);
+    }
+
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean isGameStateRUNNING(){

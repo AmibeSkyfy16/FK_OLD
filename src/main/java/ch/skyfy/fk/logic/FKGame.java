@@ -1,16 +1,10 @@
 package ch.skyfy.fk.logic;
 
 import ch.skyfy.fk.ScoreboardManager;
-import ch.skyfy.fk.commands.CommandManager;
-import ch.skyfy.fk.commands.PauseCmd;
-import ch.skyfy.fk.commands.ResumeCmd;
-import ch.skyfy.fk.commands.StartCmd;
 import ch.skyfy.fk.config.Configs;
 import ch.skyfy.fk.config.data.Cube;
-import ch.skyfy.fk.config.data.FKTeam;
 import ch.skyfy.fk.events.*;
 import me.bymartrixx.playerevents.api.event.PlayerJoinCallback;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
@@ -60,10 +54,6 @@ public class FKGame {
 
     private final Map<String, Vec3d> playerPositionWhenPaused;
 
-    private final StartCmd startCmd;
-    private final PauseCmd pauseCmd;
-    private final ResumeCmd resumeCmd;
-
     public FKGame(MinecraftServer server) {
         this.server = server;
         this.timeline = new Timeline(server);
@@ -72,11 +62,7 @@ public class FKGame {
         fkGameEvents = new FKGameEvents();
         this.playerPositionWhenPaused = new HashMap<>();
 
-        startCmd = new StartCmd(this);
-        pauseCmd = new PauseCmd(this);
-        resumeCmd = new ResumeCmd(this);
-
-//        registerCommands();
+        setWorldSpawn();
         registerEvents();
     }
 
@@ -101,11 +87,6 @@ public class FKGame {
     }
 
     public void resume(ServerPlayerEntity player) {
-
-        if (GameUtils.areMissingPlayers(server.getPlayerManager().getPlayerList())) {
-            GameUtils.sendMissingPlayersMessage(player, server.getPlayerManager().getPlayerList());
-        }
-
         // If the timeline wasn't started (in the case of a server restart with gamestate at PAUSE OR RUNNING)
         if (!timeline.getIsRunningRef().get()) {
             timeline.startTimer();
@@ -138,6 +119,11 @@ public class FKGame {
 
     }
 
+    private void setWorldSpawn(){
+        var spawnLocation = Configs.FK_CONFIG.config.worldSpawn;
+        server.getOverworld().setSpawnPos(new BlockPos(spawnLocation.getX(), spawnLocation.getY(), spawnLocation.getZ()), 1.0f);
+    }
+
     private void registerEvents() {
         // Event use when the game state is "running"
         PlayerBlockBreakEvents.BEFORE.register(fkGameEvents::cancelPlayerFromBreakingBlocks);
@@ -149,8 +135,10 @@ public class FKGame {
         PlayerEnterPortalCallback.EVENT.register(fkGameEvents::cancelPlayerFromEnteringInPortal);
         PlayerMoveCallback.EVENT.register(fkGameEvents::cancelPlayersFromMoving);
         PlayerDamageCallback.EVENT.register(fkGameEvents::onPlayerDamage);
+        PlayerHungerCallback.EVENT.register(fkGameEvents::onPlayerHungerUpdate);
 
         // Event use when the game state is "pause"
+        PlayerJoinCallback.EVENT.register(pauseEvents::playerJoin);
         EntityMoveCallback.EVENT.register(pauseEvents::stopEntitiesFromMoving);
         TimeOfDayUpdatedCallback.EVENT.register(pauseEvents::cancelTimeOfDayToBeingUpdated);
 
@@ -158,44 +146,30 @@ public class FKGame {
         PlayerJoinCallback.EVENT.register(notStartedEvents::teleportPlayerToWaitingRoom);
     }
 
-    public void registerCommands(){
-        System.out.println("registering commands ...");
-        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
-            dispatcher.register(net.minecraft.server.command.CommandManager.literal("FKStart").executes(startCmd));
-            dispatcher.register(net.minecraft.server.command.CommandManager.literal("FKPause").executes(pauseCmd));
-            dispatcher.register(net.minecraft.server.command.CommandManager.literal("FKResume").executes(resumeCmd));
-        });
-    }
-
-    public StartCmd getStartCmd() {
-        return startCmd;
-    }
-
-    public PauseCmd getPauseCmd() {
-        return pauseCmd;
-    }
-
-    public ResumeCmd getResumeCmd() {
-        return resumeCmd;
+    public void addPlayerPosIfAbsentWhenPAUSED(ServerPlayerEntity player){
+        if(GameUtils.isGameStatePAUSE()){
+            System.out.println("player loc at joiin: " +player.getPos().toString());
+            playerPositionWhenPaused.putIfAbsent(player.getUuidAsString(), new Vec3d(player.getX(), player.getY(), player.getZ()));
+        }
     }
 
     /**
      * This class contains events that will be used when the game state is "RUNNING
      */
     @SuppressWarnings("ConstantConditions")
-    class FKGameEvents {
+    public class FKGameEvents {
 
-        @FunctionalInterface
-        private interface BreakPlaceFillEmptyImpl<T> {
-            T impl(boolean isPlayerInHisOwnBase, boolean isPlayerInAnEnemyBase, boolean isPlayerCloseToHisOwnBase, boolean isPlayerCloseToAnEnemyBase);
-
-        }
+//        @FunctionalInterface
+//        public interface WhereIsThePlayer<T> {
+//            T impl(boolean isPlayerInHisOwnBase, boolean isPlayerInAnEnemyBase, boolean isPlayerCloseToHisOwnBase, boolean isPlayerCloseToAnEnemyBase);
+//
+//        }
 
         @SuppressWarnings({"RedundantIfStatement"})
         private boolean cancelPlayerFromBreakingBlocks(World world, PlayerEntity player, BlockPos pos, BlockState state, /* Nullable */ BlockEntity blockEntity) {
-            if (!GameUtils.isGameStateRUNNING()) return true;
+            if (player.hasPermissionLevel(4)) return true;
 
-            var breakPlace = (BreakPlaceFillEmptyImpl<Boolean>) (isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase) -> {
+            var breakPlace = (GameUtils.WhereIsThePlayer<Boolean>) (isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase) -> {
                 var block = world.getBlockState(pos).getBlock();
 
                 // If the player is inside an enemy base
@@ -229,14 +203,14 @@ public class FKGame {
                 return true;
             };
 
-            return iDontKnowTheNameOfThisMethod(player, new Vec3d(pos.getX(), pos.getY(), pos.getZ()), breakPlace);
+            return GameUtils.whereIsThePlayer(player, new Vec3d(pos.getX(), pos.getY(), pos.getZ()), breakPlace);
 
         }
 
         private ActionResult cancelPlayerFromPlacingBlocks(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
-            if (!GameUtils.isGameStateRUNNING()) return ActionResult.PASS;
+            if (player.hasPermissionLevel(4)) return ActionResult.PASS;
 
-            var placeBlock = (BreakPlaceFillEmptyImpl<ActionResult>) (isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase) -> {
+            var placeBlock = (GameUtils.WhereIsThePlayer<ActionResult>) (isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase) -> {
 
                 var placedItemStack = player.getStackInHand(player.getActiveHand());
 
@@ -273,13 +247,13 @@ public class FKGame {
             };
 
             var blockPos = hitResult.getBlockPos();
-            return iDontKnowTheNameOfThisMethod(player, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), placeBlock);
+            return GameUtils.whereIsThePlayer(player, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), placeBlock);
         }
 
         private TypedActionResult<ItemStack> cancelPlayerFromFillingABucket(World world, PlayerEntity player, Hand hand, Fluid fillFluid, BucketItem bucketItem, BlockHitResult blockHitResult) {
-            if (!GameUtils.isGameStateRUNNING()) return TypedActionResult.pass(player.getStackInHand(hand));
+            if (player.hasPermissionLevel(4)) return TypedActionResult.pass(player.getStackInHand(hand));
 
-            var fillBucketImpl = (BreakPlaceFillEmptyImpl<TypedActionResult<ItemStack>>) (isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase) -> {
+            var fillBucketImpl = (GameUtils.WhereIsThePlayer<TypedActionResult<ItemStack>>) (isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase) -> {
 
                 var placedItemStack = player.getStackInHand(player.getActiveHand());
 
@@ -315,13 +289,13 @@ public class FKGame {
             };
 
             var blockPos = blockHitResult.getBlockPos();
-            return FKGameEvents.this.iDontKnowTheNameOfThisMethod(player, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), fillBucketImpl);
+            return GameUtils.whereIsThePlayer(player, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), fillBucketImpl);
         }
 
         private TypedActionResult<ItemStack> cancelPlayerFromEmptyingABucket(World world, PlayerEntity player, Hand hand, Fluid emptyFluid, BucketItem bucketItem, BlockHitResult blockHitResult) {
-            if (!GameUtils.isGameStateRUNNING()) return TypedActionResult.pass(player.getStackInHand(hand));
+            if (player.hasPermissionLevel(4)) return TypedActionResult.pass(player.getStackInHand(hand));
 
-            var emptyBucketImpl = (BreakPlaceFillEmptyImpl<TypedActionResult<ItemStack>>) (isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase) -> {
+            var emptyBucketImpl = (GameUtils.WhereIsThePlayer<TypedActionResult<ItemStack>>) (isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase) -> {
 
                 var placedItemStack = player.getStackInHand(player.getActiveHand());
 
@@ -356,13 +330,13 @@ public class FKGame {
             };
 
             var blockPos = blockHitResult.getBlockPos();
-            return FKGameEvents.this.iDontKnowTheNameOfThisMethod(player, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), emptyBucketImpl);
+            return GameUtils.whereIsThePlayer(player, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), emptyBucketImpl);
         }
 
         private ActionResult cancelPlayerFromFiringATNT(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
-            if (!GameUtils.isGameStateRUNNING()) return ActionResult.PASS;
+            if (player.hasPermissionLevel(4)) return ActionResult.PASS;
 
-            var emptyBucketImpl = (BreakPlaceFillEmptyImpl<ActionResult>) (isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase) -> {
+            var emptyBucketImpl = (GameUtils.WhereIsThePlayer<ActionResult>) (isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase) -> {
 
                 var stackInHand = player.getStackInHand(hand);
 
@@ -410,10 +384,12 @@ public class FKGame {
             };
 
             var blockPos = hitResult.getBlockPos();
-            return FKGameEvents.this.iDontKnowTheNameOfThisMethod(player, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), emptyBucketImpl);
+            return GameUtils.whereIsThePlayer(player, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), emptyBucketImpl);
         }
 
         private ActionResult cancelPlayerPvP(PlayerEntity player, World world, Hand hand, Entity entity, @Nullable EntityHitResult hitResult) {
+            if (player.hasPermissionLevel(4)) return ActionResult.PASS;
+
             if (!GameUtils.isGameStateRUNNING()) return ActionResult.PASS;
 
             if (entity instanceof PlayerEntity)
@@ -423,6 +399,7 @@ public class FKGame {
         }
 
         private ActionResult cancelPlayerFromEnteringInPortal(ServerPlayerEntity player, Identifier dimensionId) {
+            if (player.hasPermissionLevel(4)) return ActionResult.PASS;
 
             if (dimensionId == DimensionType.THE_NETHER_ID) {
                 if (!GameUtils.isNetherEnabled(timeline.timelineData.getDay()))
@@ -435,27 +412,11 @@ public class FKGame {
             return ActionResult.PASS;
         }
 
-//        private void teleportPlayerToWaitingRoom(ServerPlayerEntity player, MinecraftServer server) {
-//            if (!GameUtils.isGameStateNOT_STARTED()) return;
-//
-//            var spawnLoc = Configs.FK_CONFIG.config.waitingRoom.getSpawnLocation();
-//
-//            StreamSupport.stream(server.getWorlds().spliterator(), false)
-//                    .filter(serverWorld -> serverWorld.getDimension().getEffects().toString().equals(spawnLoc.getDimensionName()))
-//                    .findFirst()
-//                    .ifPresent(serverWorld -> {
-//                        updateTeam(server, player);
-//                        ScoreboardManager.getInstance().updateSidebar(player, 0, 0, 0);
-//
-//                        player.teleport(serverWorld, spawnLoc.getX(), spawnLoc.getY(), spawnLoc.getZ(), spawnLoc.getYaw(), spawnLoc.getPitch());
-//                    });
-//        }
-
         private ActionResult cancelPlayersFromMoving(PlayerMoveCallback.MoveData moveData, ServerPlayerEntity player) {
             if (player.hasPermissionLevel(4)) return ActionResult.PASS; // OP Player can move anymore
 
             // Cancel player from going outside the waitingRoom
-            if(GameUtils.isGameStateNOT_STARTED()){
+            if (GameUtils.isGameStateNOT_STARTED()) {
                 if (Utils.didPlayerTryToLeaveAnArea(Configs.FK_CONFIG.config.waitingRoom.getCube(), player))
                     return ActionResult.FAIL;
 
@@ -463,7 +424,7 @@ public class FKGame {
             }
 
             // Cancel player from moving.
-            if(GameUtils.isGameStatePAUSE()){
+            if (GameUtils.isGameStatePAUSE()) {
                 for (var entry : playerPositionWhenPaused.entrySet()) {
                     var fkPlayer = server.getPlayerManager().getPlayer(UUID.fromString(entry.getKey()));
                     if (fkPlayer != null) { // If fkPlayer is null, this is because it is not connected
@@ -479,75 +440,91 @@ public class FKGame {
             return ActionResult.PASS;
         }
 
-        private ActionResult onPlayerDamage(DamageSource source, float amount) {
-            if(GameUtils.isGameStatePAUSE() || GameUtils.isGameStateNOT_STARTED())
+        private ActionResult onPlayerDamage(ServerPlayerEntity player, DamageSource source, float amount) {
+            if (player.hasPermissionLevel(4)) return ActionResult.PASS;
+
+            if (GameUtils.isGameStatePAUSE() || GameUtils.isGameStateNOT_STARTED())
                 return ActionResult.FAIL;
             return ActionResult.PASS;
         }
 
-        private <T> T iDontKnowTheNameOfThisMethod(PlayerEntity player, Vec3d blockPos, BreakPlaceFillEmptyImpl<T> breakPlace) {
+        private ActionResult onPlayerHungerUpdate(PlayerEntity player){
+            if (player.hasPermissionLevel(4)) return ActionResult.PASS;
 
-            var isPlayerInHisOwnBase = false;
-
-            var isPlayerInAnEnemyBase = false;
-
-            // Is the player close to his own base, but not inside
-            var isPlayerCloseToHisOwnBase = false;
-
-            // Is the player close to an enemy base, but not inside
-            var isPlayerCloseToAnEnemyBase = false;
-
-            for (FKTeam team : Configs.BASES_CONFIG.config.teams) {
-                var baseSquare = team.getBase().getSquare();
-
-                // Is this base the base of the player who break the block ?
-                var isBaseOfPlayer = team.getPlayers().stream().anyMatch(fkPlayerName -> player.getName().asString().equals(fkPlayerName));
-
-                var isPlayerCloseToABase = false;
-
-                var proximitySquare = new Cube((short) (baseSquare.getSize() + 5), baseSquare.getNumberOfBlocksDown() + 5, baseSquare.getNumberOfBlocksUp() + 5, baseSquare.getX(), baseSquare.getY(), baseSquare.getZ());
-                if (Utils.isPlayerInsideCube(proximitySquare, blockPos)) {
-                    isPlayerCloseToABase = true;
-                }
-
-                // If player is inside a base
-                if (Utils.isPlayerInsideCube(baseSquare, blockPos)) {
-
-                    // And this base is not his own
-                    if (!isBaseOfPlayer) {
-                        isPlayerInAnEnemyBase = true;
-                    } else {
-                        isPlayerInHisOwnBase = true;
-                    }
-
-                } else {
-
-                    // If the player is close to a base, but not inside
-                    if (isPlayerCloseToABase) {
-                        if (!isPlayerInHisOwnBase) {
-                            if (isBaseOfPlayer) isPlayerCloseToHisOwnBase = true;
-                            else isPlayerCloseToAnEnemyBase = true;
-                        } else if (!isPlayerInAnEnemyBase) {
-                            if (!isBaseOfPlayer) isPlayerCloseToAnEnemyBase = true;
-                            else isPlayerCloseToHisOwnBase = true;
-                        }
-                    }
-
-                }
-
+            if( GameUtils.isGameStateNOT_STARTED() || GameUtils.isGameStatePAUSE()){
+                return ActionResult.FAIL;
             }
-
-            return breakPlace.impl(isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase);
+            return ActionResult.PASS;
         }
+
+//        private <T> T whereIsThePlayer(PlayerEntity player, Vec3d blockPos, BreakPlaceFillEmptyImpl<T> breakPlace) {
+//
+//            var isPlayerInHisOwnBase = false;
+//
+//            var isPlayerInAnEnemyBase = false;
+//
+//            // Is the player close to his own base, but not inside
+//            var isPlayerCloseToHisOwnBase = false;
+//
+//            // Is the player close to an enemy base, but not inside
+//            var isPlayerCloseToAnEnemyBase = false;
+//
+//            for (FKTeam team : Configs.BASES_CONFIG.config.teams) {
+//                var baseSquare = team.getBase().getSquare();
+//
+//                // Is this base the base of the player who break the block ?
+//                var isBaseOfPlayer = team.getPlayers().stream().anyMatch(fkPlayerName -> player.getName().asString().equals(fkPlayerName));
+//
+//                var isPlayerCloseToABase = false;
+//
+//                var proximitySquare = new Cube((short) (baseSquare.getSize() + 5), baseSquare.getNumberOfBlocksDown() + 5, baseSquare.getNumberOfBlocksUp() + 5, baseSquare.getX(), baseSquare.getY(), baseSquare.getZ());
+//                if (Utils.isPlayerInsideCube(proximitySquare, blockPos)) {
+//                    isPlayerCloseToABase = true;
+//                }
+//
+//                // If player is inside a base
+//                if (Utils.isPlayerInsideCube(baseSquare, blockPos)) {
+//
+//                    // And this base is not his own
+//                    if (!isBaseOfPlayer) {
+//                        isPlayerInAnEnemyBase = true;
+//                    } else {
+//                        isPlayerInHisOwnBase = true;
+//                    }
+//
+//                } else {
+//
+//                    // If the player is close to a base, but not inside
+//                    if (isPlayerCloseToABase) {
+//                        if (!isPlayerInHisOwnBase) {
+//                            if (isBaseOfPlayer) isPlayerCloseToHisOwnBase = true;
+//                            else isPlayerCloseToAnEnemyBase = true;
+//                        } else if (!isPlayerInAnEnemyBase) {
+//                            if (!isBaseOfPlayer) isPlayerCloseToAnEnemyBase = true;
+//                            else isPlayerCloseToHisOwnBase = true;
+//                        }
+//                    }
+//
+//                }
+//
+//            }
+//
+//            return breakPlace.impl(isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase);
+//        }
 
     }
 
-    static class PauseEvents {
+    class PauseEvents {
+
+        private void playerJoin(ServerPlayerEntity player, MinecraftServer server){
+            if(GameUtils.isGameStatePAUSE()){
+                System.out.println("player loc at joiin: " +player.getPos().toString());
+                playerPositionWhenPaused.putIfAbsent(player.getUuidAsString(), new Vec3d(player.getX(), player.getY(), player.getZ()));
+            }
+        }
 
         private ActionResult stopEntitiesFromMoving(Entity entity, MovementType movementType, Vec3d movement) {
             if (!GameUtils.isGameStatePAUSE()) return ActionResult.PASS;
-
-
             return ActionResult.FAIL;
         }
 
@@ -559,8 +536,10 @@ public class FKGame {
     }
 
     @SuppressWarnings("ConstantConditions")
-    class NotStartedEvents{
+    class NotStartedEvents {
         private void teleportPlayerToWaitingRoom(ServerPlayerEntity player, MinecraftServer server) {
+            if (player.hasPermissionLevel(4)) return;
+
             if (!GameUtils.isGameStateNOT_STARTED()) return;
 
             var spawnLoc = Configs.FK_CONFIG.config.waitingRoom.getSpawnLocation();

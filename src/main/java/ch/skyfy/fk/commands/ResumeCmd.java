@@ -2,6 +2,7 @@ package ch.skyfy.fk.commands;
 
 import ch.skyfy.fk.FK;
 import ch.skyfy.fk.logic.FKGame;
+import ch.skyfy.fk.logic.GameUtils;
 import ch.skyfy.fk.logic.data.AllData;
 import ch.skyfy.fk.logic.data.FKGameData;
 import com.mojang.brigadier.Command;
@@ -14,16 +15,19 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+
 import static net.minecraft.util.Util.NIL_UUID;
 
 public class ResumeCmd implements Command<ServerCommandSource> {
 
-    private final FKGame fkGame;
+    private final AtomicReference<Optional<FKGame>> optFKGameRef;
 
     private final FKGameData fkGameData = AllData.FK_GAME_DATA.config;
 
-    public ResumeCmd(final FKGame fkGame) {
-        this.fkGame = fkGame;
+    public ResumeCmd(final AtomicReference<Optional<FKGame>> optFKGameRef) {
+        this.optFKGameRef = optFKGameRef;
     }
 
     @Override
@@ -43,10 +47,16 @@ public class ResumeCmd implements Command<ServerCommandSource> {
             case RUNNING ->
                     player.sendMessage(new LiteralText("The game cannot be resumed because it is running !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
             case PAUSED -> {
+
+                if (GameUtils.areMissingPlayers(source.getServer().getPlayerManager().getPlayerList())) {
+                    GameUtils.sendMissingPlayersMessage(player, source.getServer().getPlayerManager().getPlayerList());
+                    return 0;
+                }
+
                 source.getServer().getPlayerManager().broadcast(new LiteralText("The game has been resumed").setStyle(Style.EMPTY.withColor(Formatting.GREEN)), MessageType.CHAT, NIL_UUID);
 
                 fkGameData.setGameState(FK.GameState.RUNNING);
-                fkGame.resume(player);
+                optFKGameRef.get().ifPresent(fkGame -> fkGame.resume(player));
             }
         }
 

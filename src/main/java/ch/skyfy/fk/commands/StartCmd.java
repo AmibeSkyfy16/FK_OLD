@@ -14,17 +14,19 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+
 import static net.minecraft.util.Util.NIL_UUID;
 
-@SuppressWarnings({"FieldCanBeLocal", "ClassCanBeRecord"})
 public class StartCmd implements Command<ServerCommandSource> {
 
-    private final FKGame fkGame;
+    private final AtomicReference<Optional<FKGame>> optFKGameRef;
 
     private final FKGameData fkGameData = AllData.FK_GAME_DATA.config;
 
-    public StartCmd(FKGame fkGame) {
-        this.fkGame = fkGame;
+    public StartCmd(final AtomicReference<Optional<FKGame>> optFKGameRef) {
+        this.optFKGameRef = optFKGameRef;
     }
 
     @Override
@@ -52,7 +54,7 @@ public class StartCmd implements Command<ServerCommandSource> {
 
                 fkGameData.setGameState(FK.GameState.RUNNING);
 
-                fkGame.start();
+                optFKGameRef.get().ifPresent(FKGame::start);
             }
         }
 

@@ -23,6 +23,7 @@ LES FICHIERS DE CONFIG
             5. Des informations sur la salle d'attente
                 5.1 Les coordonnées du centre de la salle d'attente (waitingRoom) ainsi que sa taille (en partant du centre)
                 5.2 Des informations sur là ou les joueurs seront téléporté la toutes premières fois qu'il se connecte
+            6. Contient des information sur le spawn du monde (là ou les joueurs arrive lorsqu'il meurt et qu'il ont pas de lit)
 
 
 LES ETATS DU JEU
@@ -66,6 +67,9 @@ LES ETATS DU JEU EN DETAILS
 
             1. Lorsqu'un joueur se connecte, il est téléporté dans se que l'on appelle, la waitingRoom.
                Temps que le jeu n'a pas démarré, les joueurs ne peuvent pas sortir de la waitingRoom.
+            2. Les joueurs ne peuvent pas subir de dégâts.
+            3. Les joueurs ne perde pas de nourritures
+            4. Le PvP est désactivé
 
     RUNNING
 
@@ -105,3 +109,7 @@ LES ETATS DU JEU EN DETAILS
 
             À l'intérieur d'une base enemies : Aucun sceau ne peut être vidé
             Dans la zone de proximité d'une base enemies : Aucun sceau ne peut être vidé
+
+
+NOTES IMPORTANTES
+    1. Les joueurs OP ne sont affecté par rien.

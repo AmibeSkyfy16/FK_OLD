@@ -6,7 +6,6 @@ import ch.skyfy.fk.config.core.ConfigUtils;
 import ch.skyfy.fk.logic.data.AllData;
 import ch.skyfy.fk.logic.data.TimelineData;
 import com.google.common.reflect.TypeToken;
-import io.netty.util.concurrent.ScheduledFuture;
 import net.minecraft.server.MinecraftServer;
 
 import java.io.IOException;
@@ -15,7 +14,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static ch.skyfy.fk.config.core.BetterConfig.CONFIG_DIRECTORY;
 

@@ -17,8 +17,8 @@ public class LivingEntityMixin {
     @Inject(at = @At("HEAD"), method = "damage", cancellable = true)
     private void onDamage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         var livingEntity = (LivingEntity)(Object)this;
-        if(livingEntity instanceof ServerPlayerEntity) {
-            var actionResult = PlayerDamageCallback.EVENT.invoker().onDamage(source, amount);
+        if(livingEntity instanceof ServerPlayerEntity player) {
+            var actionResult = PlayerDamageCallback.EVENT.invoker().onDamage(player, source, amount);
             if(actionResult == ActionResult.FAIL){
                 cir.cancel();
             }
