@@ -93,7 +93,7 @@ public class GameUtils {
         if (!missingPlayers.isEmpty()) {
             var sb = new StringBuilder();
             missingPlayers.forEach(missingPlayer -> sb.append(missingPlayer).append("\n"));
-            player.sendMessage(Text.of("the game cannot be started because the following players are missing\n" + sb), false);
+            player.sendMessage(Text.of("the game cannot be started/resumed because the following players are missing\n" + sb), false);
         }
     }
 

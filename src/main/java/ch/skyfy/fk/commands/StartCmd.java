@@ -2,8 +2,6 @@ package ch.skyfy.fk.commands;
 
 import ch.skyfy.fk.FK;
 import ch.skyfy.fk.logic.FKGame;
-import ch.skyfy.fk.logic.GameUtils;
-import ch.skyfy.fk.logic.PreFKGame;
 import ch.skyfy.fk.logic.data.AllData;
 import ch.skyfy.fk.logic.data.FKGameData;
 import com.mojang.brigadier.Command;
@@ -16,22 +14,17 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 import static net.minecraft.util.Util.NIL_UUID;
 
 @SuppressWarnings({"FieldCanBeLocal", "ClassCanBeRecord"})
 public class StartCmd implements Command<ServerCommandSource> {
 
-    private final PreFKGame preFKGame;
-
-    private final AtomicReference<FKGame> fkGameRef;
+    private final FKGame fkGame;
 
     private final FKGameData fkGameData = AllData.FK_GAME_DATA.config;
 
-    public StartCmd(PreFKGame preFKGame, AtomicReference<FKGame> fkGameRef) {
-        this.preFKGame = preFKGame;
-        this.fkGameRef = fkGameRef;
+    public StartCmd(FKGame fkGame) {
+        this.fkGame = fkGame;
     }
 
     @Override
@@ -47,18 +40,8 @@ public class StartCmd implements Command<ServerCommandSource> {
 
         switch (fkGameData.getGameState()){
             case PAUSED -> player.sendMessage(new LiteralText("The game cannot be started because it is paused !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
-            case RUNNING -> {
-
-                // If the server was restart and the state was RUNNING, we have to create a new FKGame object
-                if(fkGameRef.get() == null){
-                    fkGameRef.set(new FKGame(source.getServer()));
-                    return 0;
-                }
-
-                player.sendMessage(new LiteralText("The game has already started !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
-            }
+            case RUNNING -> player.sendMessage(new LiteralText("The game has already started !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
             case NOT_STARTED -> {
-
 
                 // TODO UNCOMMENT
 //                if(GameUtils.areMissingPlayers(source.getServer().getPlayerManager().getPlayerList())){
@@ -69,8 +52,7 @@ public class StartCmd implements Command<ServerCommandSource> {
 
                 fkGameData.setGameState(FK.GameState.RUNNING);
 
-                fkGameRef.set(new FKGame(source.getServer()));
-                fkGameRef.get().start();
+                fkGame.start();
             }
         }
 

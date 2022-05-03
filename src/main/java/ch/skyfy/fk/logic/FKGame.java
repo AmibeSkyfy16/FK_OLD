@@ -1,9 +1,16 @@
 package ch.skyfy.fk.logic;
 
+import ch.skyfy.fk.ScoreboardManager;
+import ch.skyfy.fk.commands.CommandManager;
+import ch.skyfy.fk.commands.PauseCmd;
+import ch.skyfy.fk.commands.ResumeCmd;
+import ch.skyfy.fk.commands.StartCmd;
 import ch.skyfy.fk.config.Configs;
-import ch.skyfy.fk.config.data.FKTeam;
 import ch.skyfy.fk.config.data.Cube;
+import ch.skyfy.fk.config.data.FKTeam;
 import ch.skyfy.fk.events.*;
+import me.bymartrixx.playerevents.api.event.PlayerJoinCallback;
+import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
@@ -37,26 +44,39 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.StreamSupport;
 
+@SuppressWarnings("FieldCanBeLocal")
 public class FKGame {
 
     private final MinecraftServer server;
 
     public Timeline timeline;
 
+    private final NotStartedEvents notStartedEvents;
     private final PauseEvents pauseEvents;
 
-    private final FKGameEvents FKGameEvents;
+    private final FKGameEvents fkGameEvents;
 
     private final Map<String, Vec3d> playerPositionWhenPaused;
+
+    private final StartCmd startCmd;
+    private final PauseCmd pauseCmd;
+    private final ResumeCmd resumeCmd;
 
     public FKGame(MinecraftServer server) {
         this.server = server;
         this.timeline = new Timeline(server);
+        notStartedEvents = new NotStartedEvents();
         pauseEvents = new PauseEvents();
-        FKGameEvents = new FKGameEvents();
+        fkGameEvents = new FKGameEvents();
         this.playerPositionWhenPaused = new HashMap<>();
 
+        startCmd = new StartCmd(this);
+        pauseCmd = new PauseCmd(this);
+        resumeCmd = new ResumeCmd(this);
+
+//        registerCommands();
         registerEvents();
     }
 
@@ -82,35 +102,81 @@ public class FKGame {
 
     public void resume(ServerPlayerEntity player) {
 
-        if(GameUtils.areMissingPlayers(server.getPlayerManager().getPlayerList())){
+        if (GameUtils.areMissingPlayers(server.getPlayerManager().getPlayerList())) {
             GameUtils.sendMissingPlayersMessage(player, server.getPlayerManager().getPlayerList());
         }
 
         // If the timeline wasn't started (in the case of a server restart with gamestate at PAUSE OR RUNNING)
-        if(!timeline.getIsRunningRef().get()){
+        if (!timeline.getIsRunningRef().get()) {
             timeline.startTimer();
         }
 
         playerPositionWhenPaused.clear();
     }
 
+    private void updateTeam(MinecraftServer server, ServerPlayerEntity player) {
+        var playerName = player.getName().asString();
+
+        var serverScoreboard = server.getScoreboard();
+
+        var fkTeam = GameUtils.getFKTeamOfPlayerByName(playerName);
+        if (fkTeam == null) return;
+
+        var team = serverScoreboard.getTeam(fkTeam.getName());
+        if (team == null) { // Create a new team
+            team = serverScoreboard.addTeam(fkTeam.getName());
+            team.setColor(Formatting.byName(fkTeam.getColor()));
+        }
+
+        var playerTeam = serverScoreboard.getPlayerTeam(playerName);
+        if (playerTeam == null) { // Player has no team
+            serverScoreboard.addPlayerToTeam(playerName, team);
+        }
+
+        serverScoreboard.updateScoreboardTeamAndPlayers(team);
+        serverScoreboard.updateScoreboardTeam(team);
+
+    }
+
     private void registerEvents() {
-
         // Event use when the game state is "running"
-        PlayerBlockBreakEvents.BEFORE.register(FKGameEvents::cancelPlayerFromBreakingBlocks);
-        UseBlockCallback.EVENT.register(FKGameEvents::cancelPlayerFromPlacingBlocks);
-        BucketFillEvent.EVENT.register(FKGameEvents::cancelPlayerFromFillingABucket);
-        BucketEmptyEvent.EVENT.register(FKGameEvents::cancelPlayerFromEmptyingABucket);
-        UseBlockCallback.EVENT.register(FKGameEvents::cancelPlayerFromFiringATNT);
-        AttackEntityCallback.EVENT.register(FKGameEvents::cancelPlayerPvP);
-        PlayerEnterPortalCallback.EVENT.register(FKGameEvents::cancelPlayerFromEnteringInPortal);
-
+        PlayerBlockBreakEvents.BEFORE.register(fkGameEvents::cancelPlayerFromBreakingBlocks);
+        UseBlockCallback.EVENT.register(fkGameEvents::cancelPlayerFromPlacingBlocks);
+        BucketFillCallback.EVENT.register(fkGameEvents::cancelPlayerFromFillingABucket);
+        BucketEmptyCallback.EVENT.register(fkGameEvents::cancelPlayerFromEmptyingABucket);
+        UseBlockCallback.EVENT.register(fkGameEvents::cancelPlayerFromFiringATNT);
+        AttackEntityCallback.EVENT.register(fkGameEvents::cancelPlayerPvP);
+        PlayerEnterPortalCallback.EVENT.register(fkGameEvents::cancelPlayerFromEnteringInPortal);
+        PlayerMoveCallback.EVENT.register(fkGameEvents::cancelPlayersFromMoving);
+        PlayerDamageCallback.EVENT.register(fkGameEvents::onPlayerDamage);
 
         // Event use when the game state is "pause"
-        PlayerMoveCallback.EVENT.register(pauseEvents::stopThePlayersFromMoving);
         EntityMoveCallback.EVENT.register(pauseEvents::stopEntitiesFromMoving);
-        PlayerDamageCallback.EVENT.register(pauseEvents::onPlayerDamage);
         TimeOfDayUpdatedCallback.EVENT.register(pauseEvents::cancelTimeOfDayToBeingUpdated);
+
+        // Event use when the game state is NOT_STARTED
+        PlayerJoinCallback.EVENT.register(notStartedEvents::teleportPlayerToWaitingRoom);
+    }
+
+    public void registerCommands(){
+        System.out.println("registering commands ...");
+        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
+            dispatcher.register(net.minecraft.server.command.CommandManager.literal("FKStart").executes(startCmd));
+            dispatcher.register(net.minecraft.server.command.CommandManager.literal("FKPause").executes(pauseCmd));
+            dispatcher.register(net.minecraft.server.command.CommandManager.literal("FKResume").executes(resumeCmd));
+        });
+    }
+
+    public StartCmd getStartCmd() {
+        return startCmd;
+    }
+
+    public PauseCmd getPauseCmd() {
+        return pauseCmd;
+    }
+
+    public ResumeCmd getResumeCmd() {
+        return resumeCmd;
     }
 
     /**
@@ -369,6 +435,56 @@ public class FKGame {
             return ActionResult.PASS;
         }
 
+//        private void teleportPlayerToWaitingRoom(ServerPlayerEntity player, MinecraftServer server) {
+//            if (!GameUtils.isGameStateNOT_STARTED()) return;
+//
+//            var spawnLoc = Configs.FK_CONFIG.config.waitingRoom.getSpawnLocation();
+//
+//            StreamSupport.stream(server.getWorlds().spliterator(), false)
+//                    .filter(serverWorld -> serverWorld.getDimension().getEffects().toString().equals(spawnLoc.getDimensionName()))
+//                    .findFirst()
+//                    .ifPresent(serverWorld -> {
+//                        updateTeam(server, player);
+//                        ScoreboardManager.getInstance().updateSidebar(player, 0, 0, 0);
+//
+//                        player.teleport(serverWorld, spawnLoc.getX(), spawnLoc.getY(), spawnLoc.getZ(), spawnLoc.getYaw(), spawnLoc.getPitch());
+//                    });
+//        }
+
+        private ActionResult cancelPlayersFromMoving(PlayerMoveCallback.MoveData moveData, ServerPlayerEntity player) {
+            if (player.hasPermissionLevel(4)) return ActionResult.PASS; // OP Player can move anymore
+
+            // Cancel player from going outside the waitingRoom
+            if(GameUtils.isGameStateNOT_STARTED()){
+                if (Utils.didPlayerTryToLeaveAnArea(Configs.FK_CONFIG.config.waitingRoom.getCube(), player))
+                    return ActionResult.FAIL;
+
+                return ActionResult.PASS;
+            }
+
+            // Cancel player from moving.
+            if(GameUtils.isGameStatePAUSE()){
+                for (var entry : playerPositionWhenPaused.entrySet()) {
+                    var fkPlayer = server.getPlayerManager().getPlayer(UUID.fromString(entry.getKey()));
+                    if (fkPlayer != null) { // If fkPlayer is null, this is because it is not connected
+                        var pos = entry.getValue();
+                        var cube = new Cube((short) 1, 3, 3, pos.x, pos.y, pos.z); // The area where the player can move
+                        if (Utils.didPlayerTryToLeaveAnArea(cube, player))
+                            return ActionResult.FAIL;
+                    }
+                }
+            }
+
+
+            return ActionResult.PASS;
+        }
+
+        private ActionResult onPlayerDamage(DamageSource source, float amount) {
+            if(GameUtils.isGameStatePAUSE() || GameUtils.isGameStateNOT_STARTED())
+                return ActionResult.FAIL;
+            return ActionResult.PASS;
+        }
+
         private <T> T iDontKnowTheNameOfThisMethod(PlayerEntity player, Vec3d blockPos, BreakPlaceFillEmptyImpl<T> breakPlace) {
 
             var isPlayerInHisOwnBase = false;
@@ -426,37 +542,12 @@ public class FKGame {
 
     }
 
-    class PauseEvents {
-
-        private ActionResult stopThePlayersFromMoving(PlayerMoveCallback.MoveData moveData, ServerPlayerEntity player) {
-            if (!GameUtils.isGameStatePAUSE()) return ActionResult.PASS;
-
-            if(player.hasPermissionLevel(4))return ActionResult.PASS; // OP Player can move anymore
-
-            for (var entry : playerPositionWhenPaused.entrySet()) {
-                var fkPlayer = server.getPlayerManager().getPlayer(UUID.fromString(entry.getKey()));
-                if (fkPlayer != null) { // If fkPlayer is null, this is because it is not connected
-                    var pos = entry.getValue();
-                    var square = new Cube((short) 1,3,3, pos.x, pos.y, pos.z); // The area where the player can move
-
-                    if (Utils.didPlayerTryToLeaveAnArea(square, player))
-                        return ActionResult.FAIL;
-                }
-            }
-
-            return ActionResult.PASS;
-        }
+    static class PauseEvents {
 
         private ActionResult stopEntitiesFromMoving(Entity entity, MovementType movementType, Vec3d movement) {
             if (!GameUtils.isGameStatePAUSE()) return ActionResult.PASS;
 
 
-
-            return ActionResult.FAIL;
-        }
-
-        private ActionResult onPlayerDamage(DamageSource source, float amount) {
-            if (!GameUtils.isGameStatePAUSE()) return ActionResult.PASS;
             return ActionResult.FAIL;
         }
 
@@ -465,6 +556,25 @@ public class FKGame {
             return ActionResult.FAIL;
         }
 
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    class NotStartedEvents{
+        private void teleportPlayerToWaitingRoom(ServerPlayerEntity player, MinecraftServer server) {
+            if (!GameUtils.isGameStateNOT_STARTED()) return;
+
+            var spawnLoc = Configs.FK_CONFIG.config.waitingRoom.getSpawnLocation();
+
+            StreamSupport.stream(server.getWorlds().spliterator(), false)
+                    .filter(serverWorld -> serverWorld.getDimension().getEffects().toString().equals(spawnLoc.getDimensionName()))
+                    .findFirst()
+                    .ifPresent(serverWorld -> {
+                        updateTeam(server, player);
+                        ScoreboardManager.getInstance().updateSidebar(player, 0, 0, 0);
+
+                        player.teleport(serverWorld, spawnLoc.getX(), spawnLoc.getY(), spawnLoc.getZ(), spawnLoc.getYaw(), spawnLoc.getPitch());
+                    });
+        }
     }
 
 }

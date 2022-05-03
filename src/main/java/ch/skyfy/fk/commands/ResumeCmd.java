@@ -2,7 +2,6 @@ package ch.skyfy.fk.commands;
 
 import ch.skyfy.fk.FK;
 import ch.skyfy.fk.logic.FKGame;
-import ch.skyfy.fk.logic.PreFKGame;
 import ch.skyfy.fk.logic.data.AllData;
 import ch.skyfy.fk.logic.data.FKGameData;
 import com.mojang.brigadier.Command;
@@ -15,21 +14,16 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 import static net.minecraft.util.Util.NIL_UUID;
 
 public class ResumeCmd implements Command<ServerCommandSource> {
 
-    private final PreFKGame preFKGame;
-
-    private final AtomicReference<FKGame> fkGameRef;
+    private final FKGame fkGame;
 
     private final FKGameData fkGameData = AllData.FK_GAME_DATA.config;
 
-    public ResumeCmd(PreFKGame preFKGame, AtomicReference<FKGame> fkGameRef) {
-        this.preFKGame = preFKGame;
-        this.fkGameRef = fkGameRef;
+    public ResumeCmd(final FKGame fkGame) {
+        this.fkGame = fkGame;
     }
 
     @Override
@@ -52,7 +46,7 @@ public class ResumeCmd implements Command<ServerCommandSource> {
                 source.getServer().getPlayerManager().broadcast(new LiteralText("The game has been resumed").setStyle(Style.EMPTY.withColor(Formatting.GREEN)), MessageType.CHAT, NIL_UUID);
 
                 fkGameData.setGameState(FK.GameState.RUNNING);
-                fkGameRef.get().resume(player);
+                fkGame.resume(player);
             }
         }
 

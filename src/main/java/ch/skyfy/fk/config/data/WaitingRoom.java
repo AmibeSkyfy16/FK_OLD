@@ -13,7 +13,7 @@ public class WaitingRoom {
         this.spawnLocation = spawnLocation;
     }
 
-    public Cube getSquare() {
+    public Cube getCube() {
         return cube;
     }
 
