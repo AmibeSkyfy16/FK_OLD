@@ -56,7 +56,7 @@ public class ResumeCmd implements Command<ServerCommandSource> {
                 source.getServer().getPlayerManager().broadcast(new LiteralText("The game has been resumed").setStyle(Style.EMPTY.withColor(Formatting.GREEN)), MessageType.CHAT, NIL_UUID);
 
                 fkGameData.setGameState(FK.GameState.RUNNING);
-                optFKGameRef.get().ifPresent(fkGame -> fkGame.resume(player));
+                optFKGameRef.get().ifPresent(FKGame::resume);
             }
         }
 

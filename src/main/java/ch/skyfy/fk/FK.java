@@ -1,7 +1,10 @@
 package ch.skyfy.fk;
 
 
-import ch.skyfy.fk.commands.*;
+import ch.skyfy.fk.commands.PauseCmd;
+import ch.skyfy.fk.commands.ResumeCmd;
+import ch.skyfy.fk.commands.StartCmd;
+import ch.skyfy.fk.commands.WhereIAmCmd;
 import ch.skyfy.fk.config.Configs;
 import ch.skyfy.fk.config.core.BetterConfig;
 import ch.skyfy.fk.logic.FKGame;
@@ -12,7 +15,6 @@ import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.Vec3d;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -68,26 +70,22 @@ public class FK implements DedicatedServerModInitializer {
             firstJoin = true;
 
             final var fkGame = new FKGame(server);
-
-
             optFKGameRef.set(Optional.of(fkGame));
 
-            if(GameUtils.isGameStateRUNNING()){
+            if(GameUtils.isGameStateRUNNING())
                 AllData.FK_GAME_DATA.config.setGameState(GameState.PAUSED);
-            }
 
-            if(GameUtils.isGameStatePAUSE()){
-                fkGame.addPlayerPosIfAbsentWhenPAUSED(player);
-            }
+            if(GameUtils.isGameStatePAUSE())
+                fkGame.addPlayerPosIf_PAUSED(player);
 
         }
     }
 
     public void registerCommands(){
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
-            dispatcher.register(net.minecraft.server.command.CommandManager.literal("FKStart2").executes(startCmd));
-            dispatcher.register(net.minecraft.server.command.CommandManager.literal("FKPause2").executes(pauseCmd));
-            dispatcher.register(net.minecraft.server.command.CommandManager.literal("FKResume2").executes(resumeCmd));
+            dispatcher.register(net.minecraft.server.command.CommandManager.literal("FKStart").executes(startCmd));
+            dispatcher.register(net.minecraft.server.command.CommandManager.literal("FKPause").executes(pauseCmd));
+            dispatcher.register(net.minecraft.server.command.CommandManager.literal("FKResume").executes(resumeCmd));
 
             dispatcher.register(net.minecraft.server.command.CommandManager.literal("WhereIAm").executes(new WhereIAmCmd()));
         });

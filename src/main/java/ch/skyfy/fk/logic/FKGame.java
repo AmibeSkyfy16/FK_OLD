@@ -86,9 +86,9 @@ public class FKGame {
             playerPositionWhenPaused.putIfAbsent(fkPlayer.getUuidAsString(), new Vec3d(fkPlayer.getX(), fkPlayer.getY(), fkPlayer.getZ()));
     }
 
-    public void resume(ServerPlayerEntity player) {
+    public void resume() {
         // If the timeline wasn't started (in the case of a server restart with gamestate at PAUSE OR RUNNING)
-        if (!timeline.getIsRunningRef().get()) {
+        if (!timeline.getIsStartedRef().get()) {
             timeline.startTimer();
         }
 
@@ -146,7 +146,7 @@ public class FKGame {
         PlayerJoinCallback.EVENT.register(notStartedEvents::teleportPlayerToWaitingRoom);
     }
 
-    public void addPlayerPosIfAbsentWhenPAUSED(ServerPlayerEntity player){
+    public void addPlayerPosIf_PAUSED(ServerPlayerEntity player){
         if(GameUtils.isGameStatePAUSE()){
             System.out.println("player loc at joiin: " +player.getPos().toString());
             playerPositionWhenPaused.putIfAbsent(player.getUuidAsString(), new Vec3d(player.getX(), player.getY(), player.getZ()));
