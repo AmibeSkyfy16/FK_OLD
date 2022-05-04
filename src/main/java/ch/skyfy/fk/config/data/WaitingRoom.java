@@ -1,31 +1,18 @@
 package ch.skyfy.fk.config.data;
 
+import lombok.Getter;
+
+@SuppressWarnings("ClassCanBeRecord")
 public class WaitingRoom {
 
-    private Cube cube;
+    @Getter
+    private final Cube cube;
 
-    private SpawnLocation spawnLocation;
-
-    public WaitingRoom() {}
+    @Getter
+    private final SpawnLocation spawnLocation;
 
     public WaitingRoom(Cube cube, SpawnLocation spawnLocation) {
         this.cube = cube;
-        this.spawnLocation = spawnLocation;
-    }
-
-    public Cube getCube() {
-        return cube;
-    }
-
-    public void setSquare(Cube cube) {
-        this.cube = cube;
-    }
-
-    public SpawnLocation getSpawnLocation() {
-        return spawnLocation;
-    }
-
-    public void setSpawnLocation(SpawnLocation spawnLocation) {
         this.spawnLocation = spawnLocation;
     }
 }

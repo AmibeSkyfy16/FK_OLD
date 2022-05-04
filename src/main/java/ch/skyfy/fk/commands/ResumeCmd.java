@@ -2,8 +2,7 @@ package ch.skyfy.fk.commands;
 
 import ch.skyfy.fk.FKMod;
 import ch.skyfy.fk.logic.FKGame;
-import ch.skyfy.fk.logic.GameUtils;
-import ch.skyfy.fk.logic.data.AllData;
+import ch.skyfy.fk.logic.data.FKGameAllData;
 import ch.skyfy.fk.logic.data.FKGameData;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
@@ -12,7 +11,6 @@ import net.minecraft.network.MessageType;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Style;
-import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.util.Optional;
@@ -24,7 +22,7 @@ public class ResumeCmd implements Command<ServerCommandSource> {
 
     private final AtomicReference<Optional<FKGame>> optFKGameRef;
 
-    private final FKGameData fkGameData = AllData.FK_GAME_DATA.config;
+    private final FKGameData fkGameData = FKGameAllData.FK_GAME_DATA.config;
 
     public ResumeCmd(final AtomicReference<Optional<FKGame>> optFKGameRef) {
         this.optFKGameRef = optFKGameRef;

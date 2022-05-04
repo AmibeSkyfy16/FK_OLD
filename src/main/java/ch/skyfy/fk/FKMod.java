@@ -6,18 +6,20 @@ import ch.skyfy.fk.commands.ResumeCmd;
 import ch.skyfy.fk.commands.StartCmd;
 import ch.skyfy.fk.commands.WhereIAmCmd;
 import ch.skyfy.fk.config.Configs;
-import ch.skyfy.fk.config.core.BetterConfig;
 import ch.skyfy.fk.logic.FKGame;
 import ch.skyfy.fk.logic.GameUtils;
-import ch.skyfy.fk.logic.data.AllData;
+import ch.skyfy.fk.logic.data.FKGameAllData;
+import ch.skyfy.fk.utils.ReflectionUtils;
 import me.bymartrixx.playerevents.api.event.PlayerJoinCallback;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -33,6 +35,8 @@ public class FKMod implements DedicatedServerModInitializer {
 
     public static final Logger LOGGER = LogManager.getLogger();
 
+    public static final Path CONFIG_DIRECTORY = FabricLoader.getInstance().getConfigDir().resolve(MOD_ID);
+
     public static boolean DISABLED = false;
 
     private boolean firstJoin = false;
@@ -44,9 +48,17 @@ public class FKMod implements DedicatedServerModInitializer {
     private final ResumeCmd resumeCmd;
 
     public FKMod() throws Exception {
-        if(BetterConfig.initialize(new Class[]{AllData.class}) || BetterConfig.initialize(new Class[]{Configs.class})){
+
+        // Create a config directory named with the MOD_ID under config folder of the server
+        if(!createConfigDirectory()){
             DISABLED = true;
-            throw new Exception("GAME IS DISABLE DU TO ERROR IN JSON CONFIGS");
+            throw new Exception("CANNOT CREATE DIRECTORY");
+        }
+
+        // Load Configs.class a class that contains all our configuration data class
+        if(!ReflectionUtils.loadConfigByReflection(new Class[]{Configs.class})){
+            DISABLED = true;
+            throw new Exception("GAME IS DISABLE DU TO ERROR WITH CONFIGS");
         }
 
         optFKGameRef = new AtomicReference<>(Optional.empty());
@@ -72,7 +84,7 @@ public class FKMod implements DedicatedServerModInitializer {
             optFKGameRef.set(Optional.of(fkGame));
 
             if(GameUtils.isGameStateRUNNING())
-                AllData.FK_GAME_DATA.config.setGameState(GameState.PAUSED);
+                FKGameAllData.FK_GAME_DATA.config.setGameState(GameState.PAUSED);
 
         }
     }
@@ -86,4 +98,16 @@ public class FKMod implements DedicatedServerModInitializer {
             dispatcher.register(net.minecraft.server.command.CommandManager.literal("WhereIAm").executes(new WhereIAmCmd()));
         });
     }
+
+    private static boolean createConfigDirectory() {
+        try {
+            var file = CONFIG_DIRECTORY.toFile();
+            if (!file.exists()) return file.mkdir();
+        } catch (UnsupportedOperationException | SecurityException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
 }

@@ -1,22 +1,23 @@
 package ch.skyfy.fk.config;
 
-import ch.skyfy.fk.config.data.SpawnLocation;
 import ch.skyfy.fk.config.data.Cube;
+import ch.skyfy.fk.config.data.SpawnLocation;
 import ch.skyfy.fk.config.data.WaitingRoom;
+import lombok.Getter;
 
 public class FKConfig {
-
-    public int dayOfAuthorizationOfTheAssaults;
-
-    public int dayOfAuthorizationOfTheEntryInTheNether;
-
-    public int dayOfAuthorizationOfTheEntryInTheEnd;
-
-    public int dayOfAuthorizationOfThePvP;
-
-    public WaitingRoom waitingRoom;
-
-    public SpawnLocation worldSpawn;
+    @Getter
+    private final int dayOfAuthorizationOfTheAssaults;
+    @Getter
+    private final int dayOfAuthorizationOfTheEntryInTheNether;
+    @Getter
+    private final int dayOfAuthorizationOfTheEntryInTheEnd;
+    @Getter
+    private final int dayOfAuthorizationOfThePvP;
+    @Getter
+    private final WaitingRoom waitingRoom;
+    @Getter
+    private final SpawnLocation worldSpawn;
 
     public FKConfig() {
 

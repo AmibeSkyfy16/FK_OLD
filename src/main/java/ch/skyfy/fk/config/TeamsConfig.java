@@ -1,8 +1,9 @@
 package ch.skyfy.fk.config;
 
 import ch.skyfy.fk.config.data.Base;
-import ch.skyfy.fk.config.data.FKTeam;
 import ch.skyfy.fk.config.data.Cube;
+import ch.skyfy.fk.config.data.FKTeam;
+import lombok.Getter;
 import net.minecraft.util.Formatting;
 
 import java.util.ArrayList;
@@ -10,7 +11,8 @@ import java.util.List;
 
 public class TeamsConfig {
 
-    public List<FKTeam> teams;
+    @Getter
+    private final List<FKTeam> teams;
 
     public TeamsConfig() {
         teams = new ArrayList<>();

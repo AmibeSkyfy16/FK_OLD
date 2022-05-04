@@ -1,32 +1,19 @@
 package ch.skyfy.fk.config.data;
 
-@SuppressWarnings("unused")
+import lombok.Getter;
+
+@SuppressWarnings({"ClassCanBeRecord"})
 public class Base {
 
-    private String name;
+    @Getter
+    private final String name;
 
-    private Cube cube;
-
-    public Base() {}
+    @Getter
+    private final Cube cube;
 
     public Base(String name, Cube cube) {
         this.name = name;
         this.cube = cube;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Cube getSquare() {
-        return cube;
-    }
-
-    public void setSquare(Cube cube) {
-        this.cube = cube;
-    }
 }

@@ -1,20 +1,16 @@
 package ch.skyfy.fk.config;
 
-import ch.skyfy.fk.config.core.ConfigData;
 import ch.skyfy.fk.FKMod;
+import ch.skyfy.fk.json.JsonDataClass;
 
-/**
- * This class is loaded by reflection
- * This class contains all loaded configurations for the mods
- */
 public class Configs {
-    public static final ConfigData<FKConfig> FK = new ConfigData<>("fkconfig.json", FKConfig.class);
-    public static final ConfigData<TeamsConfig> TEAMS = new ConfigData<>("teams.json", TeamsConfig.class);
-    public static final ConfigData<WorldConfig> WORLD_CONFIG = new ConfigData<>("worldconfig.json", WorldConfig.class);
 
-    public static final ConfigData<UnbreakableAreaConfig> UNBREAKABLE_AREA_CONFIG = new ConfigData<>("unbreakableConfig.json", UnbreakableAreaConfig.class);
+    public static final JsonDataClass<FKConfig> FK_CONFIG = new JsonDataClass<>("fkconfig.json", FKConfig.class);
+    public static final JsonDataClass<TeamsConfig> TEAMS = new JsonDataClass<>("teams.json", TeamsConfig.class);
+    public static final JsonDataClass<WorldConfig> WORLD_CONFIG = new JsonDataClass<>("worldconfig.json", WorldConfig.class);
 
     static {
         FKMod.LOGGER.info(Configs.class.getName() + " has been loaded");
     }
+
 }

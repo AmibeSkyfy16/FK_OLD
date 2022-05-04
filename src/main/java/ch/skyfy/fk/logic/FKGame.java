@@ -107,7 +107,7 @@ public class FKGame {
     }
 
     private void setWorldSpawn(){
-        var spawnLocation = Configs.FK.config.worldSpawn;
+        var spawnLocation = Configs.FK_CONFIG.config.getWorldSpawn();
         server.getOverworld().setSpawnPos(new BlockPos(spawnLocation.getX(), spawnLocation.getY(), spawnLocation.getZ()), 1.0f);
     }
 
@@ -386,7 +386,7 @@ public class FKGame {
 
             // Cancel player from going outside the waitingRoom
             if (GameUtils.isGameStateNOT_STARTED()) {
-                var waitingRoom = Configs.FK.config.waitingRoom;
+                var waitingRoom = Configs.FK_CONFIG.config.getWaitingRoom();
                 if (Utils.cancelPlayerFromLeavingACube(waitingRoom.getCube(), player, Optional.of(waitingRoom.getSpawnLocation())))
                     return ActionResult.FAIL;
 
@@ -398,7 +398,7 @@ public class FKGame {
                 return ActionResult.FAIL;
 
             // Cancel the player from going too far into the map
-            if(Utils.cancelPlayerFromLeavingACube(Configs.WORLD_CONFIG.config.worldInfo.getWorldDimension(), player, Optional.empty())){
+            if(Utils.cancelPlayerFromLeavingACube(Configs.WORLD_CONFIG.config.getWorldInfo().getWorldDimension(), player, Optional.empty())){
                 player.sendMessage(new LiteralText("You reach the border limit !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
                 return ActionResult.FAIL;
             }
@@ -428,7 +428,7 @@ public class FKGame {
 
             if (!GameUtils.isGameStateNOT_STARTED()) return;
 
-            var spawnLoc = Configs.FK.config.waitingRoom.getSpawnLocation();
+            var spawnLoc = Configs.FK_CONFIG.config.getWaitingRoom().getSpawnLocation();
 
             StreamSupport.stream(server.getWorlds().spliterator(), false)
                     .filter(serverWorld -> serverWorld.getDimension().getEffects().toString().equals(spawnLoc.getDimensionName()))

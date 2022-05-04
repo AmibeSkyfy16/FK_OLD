@@ -1,9 +1,7 @@
 package ch.skyfy.fk.mixin;
 
 import ch.skyfy.fk.events.PlayerEnterPortalCallback;
-import ch.skyfy.fk.events.TimeOfDayUpdatedCallback;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.EndPortalBlock;
 import net.minecraft.block.NetherPortalBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.network.ServerPlayerEntity;
