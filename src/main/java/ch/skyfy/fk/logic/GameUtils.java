@@ -57,20 +57,6 @@ public class GameUtils {
                 .flatMap(fkTeam -> onlinePlayers.stream()
                         .filter(player -> fkTeam.getPlayers().contains(player.getName().asString())))
                 .toList();
-
-        // THE OLD WAY \\
-//        var fkPlayers = new ArrayList<ServerPlayerEntity>();
-//        for (FKTeam fkTeam : Configs.TEAMS.config.teams) {
-//            for (String fkPlayerName : fkTeam.getPlayers()) {
-//                for (ServerPlayerEntity onlinePlayer : onlinePlayers) {
-//                    if (onlinePlayer.getName().asString().equals(fkPlayerName)) {
-//                        fkPlayers.add(onlinePlayer);
-//                    }
-//                }
-//            }
-//        }
-//        return fkPlayers;
-        // THE OLD WAY \\
     }
 
     @Nullable

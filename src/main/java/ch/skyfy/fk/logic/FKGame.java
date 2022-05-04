@@ -159,12 +159,6 @@ public class FKGame {
     @SuppressWarnings("ConstantConditions")
     public class FKGameEvents {
 
-//        @FunctionalInterface
-//        public interface WhereIsThePlayer<T> {
-//            T impl(boolean isPlayerInHisOwnBase, boolean isPlayerInAnEnemyBase, boolean isPlayerCloseToHisOwnBase, boolean isPlayerCloseToAnEnemyBase);
-//
-//        }
-
         @SuppressWarnings({"RedundantIfStatement"})
         private boolean cancelPlayerFromBreakingBlocks(World world, PlayerEntity player, BlockPos pos, BlockState state, /* Nullable */ BlockEntity blockEntity) {
             if (player.hasPermissionLevel(4)) return true;
@@ -224,7 +218,6 @@ public class FKGame {
                 }
 
                 if (isPlayerInHisOwnBase) {
-                    // TODO Nothing to do for now
                     return ActionResult.PASS;
                 }
 
@@ -241,7 +234,7 @@ public class FKGame {
                     return ActionResult.PASS;
                 }
 
-                System.out.println("Player is in the wild");
+                // Player is in the wild
 
                 return ActionResult.PASS;
             };
@@ -267,7 +260,6 @@ public class FKGame {
                 }
 
                 if (isPlayerInHisOwnBase) {
-                    // TODO Nothing to do for now
                     return TypedActionResult.pass(placedItemStack);
                 }
 
@@ -283,7 +275,7 @@ public class FKGame {
                     return TypedActionResult.pass(placedItemStack);
                 }
 
-                System.out.println("Player is in the wild");
+                // Player is in the wild
 
                 return TypedActionResult.pass(placedItemStack);
             };
@@ -324,7 +316,7 @@ public class FKGame {
                     return TypedActionResult.pass(placedItemStack);
                 }
 
-                System.out.println("Player is in the wild");
+                // Player is in the wild
 
                 return TypedActionResult.pass(placedItemStack);
             };
@@ -359,12 +351,10 @@ public class FKGame {
                 }
 
                 if (isPlayerInHisOwnBase) {
-                    // TODO Nothing to do for now
                     return ActionResult.PASS;
                 }
 
                 if (isPlayerCloseToHisOwnBase) {
-                    // TODO Nothing to do for now
                     return ActionResult.PASS;
                 }
 
@@ -378,7 +368,7 @@ public class FKGame {
                     return ActionResult.PASS;
                 }
 
-                System.out.println("Player is in the wild");
+                // Player is in the wild
 
                 return ActionResult.PASS;
             };
@@ -457,71 +447,13 @@ public class FKGame {
             }
             return ActionResult.PASS;
         }
-
-//        private <T> T whereIsThePlayer(PlayerEntity player, Vec3d blockPos, BreakPlaceFillEmptyImpl<T> breakPlace) {
-//
-//            var isPlayerInHisOwnBase = false;
-//
-//            var isPlayerInAnEnemyBase = false;
-//
-//            // Is the player close to his own base, but not inside
-//            var isPlayerCloseToHisOwnBase = false;
-//
-//            // Is the player close to an enemy base, but not inside
-//            var isPlayerCloseToAnEnemyBase = false;
-//
-//            for (FKTeam team : Configs.BASES_CONFIG.config.teams) {
-//                var baseSquare = team.getBase().getSquare();
-//
-//                // Is this base the base of the player who break the block ?
-//                var isBaseOfPlayer = team.getPlayers().stream().anyMatch(fkPlayerName -> player.getName().asString().equals(fkPlayerName));
-//
-//                var isPlayerCloseToABase = false;
-//
-//                var proximitySquare = new Cube((short) (baseSquare.getSize() + 5), baseSquare.getNumberOfBlocksDown() + 5, baseSquare.getNumberOfBlocksUp() + 5, baseSquare.getX(), baseSquare.getY(), baseSquare.getZ());
-//                if (Utils.isPlayerInsideCube(proximitySquare, blockPos)) {
-//                    isPlayerCloseToABase = true;
-//                }
-//
-//                // If player is inside a base
-//                if (Utils.isPlayerInsideCube(baseSquare, blockPos)) {
-//
-//                    // And this base is not his own
-//                    if (!isBaseOfPlayer) {
-//                        isPlayerInAnEnemyBase = true;
-//                    } else {
-//                        isPlayerInHisOwnBase = true;
-//                    }
-//
-//                } else {
-//
-//                    // If the player is close to a base, but not inside
-//                    if (isPlayerCloseToABase) {
-//                        if (!isPlayerInHisOwnBase) {
-//                            if (isBaseOfPlayer) isPlayerCloseToHisOwnBase = true;
-//                            else isPlayerCloseToAnEnemyBase = true;
-//                        } else if (!isPlayerInAnEnemyBase) {
-//                            if (!isBaseOfPlayer) isPlayerCloseToAnEnemyBase = true;
-//                            else isPlayerCloseToHisOwnBase = true;
-//                        }
-//                    }
-//
-//                }
-//
-//            }
-//
-//            return breakPlace.impl(isPlayerInHisOwnBase, isPlayerInAnEnemyBase, isPlayerCloseToHisOwnBase, isPlayerCloseToAnEnemyBase);
-//        }
-
     }
 
     class PauseEvents {
 
         private void playerJoin(ServerPlayerEntity player, MinecraftServer server){
-            if(GameUtils.isGameStatePAUSE()){
-                System.out.println("player loc at joiin: " +player.getPos().toString());
+            if(GameUtils.isGameStatePAUSE())
                 playerPositionWhenPaused.putIfAbsent(player.getUuidAsString(), new Vec3d(player.getX(), player.getY(), player.getZ()));
-            }
         }
 
         private ActionResult stopEntitiesFromMoving(Entity entity, MovementType movementType, Vec3d movement) {
