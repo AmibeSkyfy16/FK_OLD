@@ -11,6 +11,8 @@ public class Configs {
     public static final ConfigData<FKConfig> FK = new ConfigData<>("fkconfig.json", FKConfig.class);
     public static final ConfigData<TeamsConfig> TEAMS = new ConfigData<>("teams.json", TeamsConfig.class);
 
+    public static final ConfigData<WorldConfig> WORLD_CONFIG = new ConfigData<>("worldconfig.json", WorldConfig.class);
+
     static {
         FKMod.LOGGER.info(Configs.class.getName() + " has been loaded");
     }

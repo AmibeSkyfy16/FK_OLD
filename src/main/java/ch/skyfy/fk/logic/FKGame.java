@@ -35,6 +35,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.ObjectInputFilter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -427,6 +428,11 @@ public class FKGame {
                 }
             }
 
+            // Cancel the player from going too far into the map
+            if(Utils.cancelPlayerFromLeavingACube(Configs.WORLD_CONFIG.config.worldInfo.getWorldDimension(), player, Optional.empty())){
+                player.sendMessage(new LiteralText("You reach the border limit !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
+                return ActionResult.FAIL;
+            }
 
             return ActionResult.PASS;
         }

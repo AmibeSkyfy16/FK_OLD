@@ -52,6 +52,11 @@ public class GameUtils {
         return Configs.TEAMS.config.teams.stream().map(FKTeam::getName).anyMatch(fkPlayerName -> fkPlayerName.equals(playerName));
     }
 
+    /**
+     *
+     * @param onlinePlayers The list of players who are currently connected
+     * @return A list with only the players participating in the FK
+     */
     public static List<ServerPlayerEntity> getAllConnectedFKPlayers(List<ServerPlayerEntity> onlinePlayers) {
         return Configs.TEAMS.config.teams.stream()
                 .flatMap(fkTeam -> onlinePlayers.stream()
@@ -61,7 +66,7 @@ public class GameUtils {
 
     @Nullable
     public static BlockPos getBaseCoordinateByPlayer(String name) {
-        for (FKTeam fkTeam : Configs.TEAMS.config.teams) {
+        for (var fkTeam : Configs.TEAMS.config.teams) {
             if (fkTeam.getPlayers().stream().anyMatch(name::equals)) {
                 return new BlockPos(fkTeam.getBase().getSquare().getX(), fkTeam.getBase().getSquare().getY(), fkTeam.getBase().getSquare().getZ());
             }
