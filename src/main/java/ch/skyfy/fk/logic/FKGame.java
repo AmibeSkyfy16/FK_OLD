@@ -37,6 +37,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.StreamSupport;
 
@@ -72,7 +73,7 @@ public class FKGame {
         timeline.startTimer();
 
         // Send a message to all fk player to tell them where their respective base is
-        for (ServerPlayerEntity fkPlayer : GameUtils.getFkPlayers(server)) {
+        for (ServerPlayerEntity fkPlayer : GameUtils.getAllConnectedFKPlayers(server.getPlayerManager().getPlayerList())) {
             var baseLoc = GameUtils.getBaseCoordinateByPlayer(fkPlayer.getName().asString());
             var message = new LiteralText("Your base is at this coords: X: " + baseLoc.getX() + " Y: " + baseLoc.getY() + " Z: " + baseLoc.getZ())
                     .setStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE));
@@ -82,7 +83,7 @@ public class FKGame {
 
     public void pause() {
         // Records the position of the players. Will prevent them from moving when the game is paused.
-        for (var fkPlayer : GameUtils.getFkPlayers(server))
+        for (var fkPlayer : GameUtils.getAllConnectedFKPlayers(server.getPlayerManager().getPlayerList()))
             playerPositionWhenPaused.putIfAbsent(fkPlayer.getUuidAsString(), new Vec3d(fkPlayer.getX(), fkPlayer.getY(), fkPlayer.getZ()));
     }
 
@@ -120,7 +121,7 @@ public class FKGame {
     }
 
     private void setWorldSpawn(){
-        var spawnLocation = Configs.FK_CONFIG.config.worldSpawn;
+        var spawnLocation = Configs.FK.config.worldSpawn;
         server.getOverworld().setSpawnPos(new BlockPos(spawnLocation.getX(), spawnLocation.getY(), spawnLocation.getZ()), 1.0f);
     }
 
@@ -148,7 +149,6 @@ public class FKGame {
 
     public void addPlayerPosIf_PAUSED(ServerPlayerEntity player){
         if(GameUtils.isGameStatePAUSE()){
-            System.out.println("player loc at joiin: " +player.getPos().toString());
             playerPositionWhenPaused.putIfAbsent(player.getUuidAsString(), new Vec3d(player.getX(), player.getY(), player.getZ()));
         }
     }
@@ -417,7 +417,8 @@ public class FKGame {
 
             // Cancel player from going outside the waitingRoom
             if (GameUtils.isGameStateNOT_STARTED()) {
-                if (Utils.didPlayerTryToLeaveAnArea(Configs.FK_CONFIG.config.waitingRoom.getCube(), player))
+                var waitingRoom = Configs.FK.config.waitingRoom;
+                if (Utils.cancelPlayerFromLeavingACube(waitingRoom.getCube(), player, Optional.of(waitingRoom.getSpawnLocation())))
                     return ActionResult.FAIL;
 
                 return ActionResult.PASS;
@@ -430,7 +431,7 @@ public class FKGame {
                     if (fkPlayer != null) { // If fkPlayer is null, this is because it is not connected
                         var pos = entry.getValue();
                         var cube = new Cube((short) 1, 3, 3, pos.x, pos.y, pos.z); // The area where the player can move
-                        if (Utils.didPlayerTryToLeaveAnArea(cube, player))
+                        if (Utils.cancelPlayerFromLeavingACube(cube, player, Optional.empty()))
                             return ActionResult.FAIL;
                     }
                 }
@@ -542,7 +543,7 @@ public class FKGame {
 
             if (!GameUtils.isGameStateNOT_STARTED()) return;
 
-            var spawnLoc = Configs.FK_CONFIG.config.waitingRoom.getSpawnLocation();
+            var spawnLoc = Configs.FK.config.waitingRoom.getSpawnLocation();
 
             StreamSupport.stream(server.getWorlds().spliterator(), false)
                     .filter(serverWorld -> serverWorld.getDimension().getEffects().toString().equals(spawnLoc.getDimensionName()))

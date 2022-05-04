@@ -1,23 +1,23 @@
 package ch.skyfy.fk.logic.data;
 
-import ch.skyfy.fk.FK;
+import ch.skyfy.fk.FKMod;
 
 public class FKGameData {
 
-    private FK.GameState gameState;
+    private FKMod.GameState gameState;
 
     private TimelineData timelineData;
 
     public FKGameData() {
-        gameState = FK.GameState.NOT_STARTED;
+        gameState = FKMod.GameState.NOT_STARTED;
         timelineData = new TimelineData(1, 0, 0);
     }
 
-    public FK.GameState getGameState() {
+    public FKMod.GameState getGameState() {
         return gameState;
     }
 
-    public void setGameState(FK.GameState gameState) {
+    public void setGameState(FKMod.GameState gameState) {
         this.gameState = gameState;
     }
 

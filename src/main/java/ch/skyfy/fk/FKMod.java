@@ -21,7 +21,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class FK implements DedicatedServerModInitializer {
+public class FKMod implements DedicatedServerModInitializer {
 
     public enum GameState {
         NOT_STARTED,
@@ -43,7 +43,7 @@ public class FK implements DedicatedServerModInitializer {
     private final PauseCmd pauseCmd;
     private final ResumeCmd resumeCmd;
 
-    public FK() throws Exception {
+    public FKMod() throws Exception {
         if(BetterConfig.initialize(new Class[]{AllData.class}) || BetterConfig.initialize(new Class[]{Configs.class})){
             DISABLED = true;
             throw new Exception("GAME IS DISABLE DU TO ERROR IN JSON CONFIGS");

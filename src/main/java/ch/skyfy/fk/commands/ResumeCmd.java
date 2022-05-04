@@ -1,6 +1,6 @@
 package ch.skyfy.fk.commands;
 
-import ch.skyfy.fk.FK;
+import ch.skyfy.fk.FKMod;
 import ch.skyfy.fk.logic.FKGame;
 import ch.skyfy.fk.logic.GameUtils;
 import ch.skyfy.fk.logic.data.AllData;
@@ -55,7 +55,7 @@ public class ResumeCmd implements Command<ServerCommandSource> {
 
                 source.getServer().getPlayerManager().broadcast(new LiteralText("The game has been resumed").setStyle(Style.EMPTY.withColor(Formatting.GREEN)), MessageType.CHAT, NIL_UUID);
 
-                fkGameData.setGameState(FK.GameState.RUNNING);
+                fkGameData.setGameState(FKMod.GameState.RUNNING);
                 optFKGameRef.get().ifPresent(FKGame::resume);
             }
         }

@@ -1,12 +1,12 @@
 package ch.skyfy.fk.logic;
 
-import ch.skyfy.fk.FK;
+import ch.skyfy.fk.FKMod;
 import ch.skyfy.fk.config.Configs;
+import ch.skyfy.fk.config.FKConfig;
 import ch.skyfy.fk.config.data.Cube;
 import ch.skyfy.fk.config.data.FKTeam;
 import ch.skyfy.fk.logic.data.AllData;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -14,9 +14,13 @@ import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-@SuppressWarnings({"unused", "ConstantConditions"})
+@SuppressWarnings({"unused"})
 public class GameUtils {
 
     @FunctionalInterface
@@ -30,7 +34,7 @@ public class GameUtils {
      */
     public static List<String> ArePlayersReady(List<ServerPlayerEntity> onlinePlayers) {
         var missingPlayers = new ArrayList<String>();
-        for (FKTeam fkTeam : Configs.BASES_CONFIG.config.teams) {
+        for (FKTeam fkTeam : Configs.TEAMS.config.teams) {
             for (String fkPlayerName : fkTeam.getPlayers()) {
                 if (onlinePlayers.stream().noneMatch(serverPlayerEntity -> serverPlayerEntity.getName().asString().equals(fkPlayerName))) {
                     missingPlayers.add(fkPlayerName);
@@ -40,33 +44,38 @@ public class GameUtils {
         return missingPlayers;
     }
 
-    public static boolean isFKPlayer(List<ServerPlayerEntity> onlinePlayers, String playerName) {
-        // Find the player to check
-        if (onlinePlayers.stream().anyMatch(serverPlayerEntity -> serverPlayerEntity.getName().asString().equals(playerName)))
-            for (FKTeam fkTeam : Configs.BASES_CONFIG.config.teams)
-                if (fkTeam.getPlayers().stream().anyMatch(fkPlayerName -> fkPlayerName.equals(playerName)))
-                    return true;
-        return false;
+    /**
+     * @param playerName The name of the player to be verified
+     * @return True if the player is part of the game. False otherwise
+     */
+    public static boolean isFKPlayer(String playerName) {
+        return Configs.TEAMS.config.teams.stream().map(FKTeam::getName).anyMatch(fkPlayerName -> fkPlayerName.equals(playerName));
     }
 
-    public static List<ServerPlayerEntity> getFkPlayers(MinecraftServer server) {
-        var onlinePlayers = server.getPlayerManager().getPlayerList();
-        var fkPlayers = new ArrayList<ServerPlayerEntity>();
-        for (FKTeam fkTeam : Configs.BASES_CONFIG.config.teams) {
-            for (String fkPlayerName : fkTeam.getPlayers()) {
-                for (ServerPlayerEntity onlinePlayer : onlinePlayers) {
-                    if (onlinePlayer.getName().asString().equals(fkPlayerName)) {
-                        fkPlayers.add(onlinePlayer);
-                    }
-                }
-            }
-        }
-        return fkPlayers;
+    public static List<ServerPlayerEntity> getAllConnectedFKPlayers(List<ServerPlayerEntity> onlinePlayers) {
+        return Configs.TEAMS.config.teams.stream()
+                .flatMap(fkTeam -> onlinePlayers.stream()
+                        .filter(player -> fkTeam.getPlayers().contains(player.getName().asString())))
+                .toList();
+
+        // THE OLD WAY \\
+//        var fkPlayers = new ArrayList<ServerPlayerEntity>();
+//        for (FKTeam fkTeam : Configs.TEAMS.config.teams) {
+//            for (String fkPlayerName : fkTeam.getPlayers()) {
+//                for (ServerPlayerEntity onlinePlayer : onlinePlayers) {
+//                    if (onlinePlayer.getName().asString().equals(fkPlayerName)) {
+//                        fkPlayers.add(onlinePlayer);
+//                    }
+//                }
+//            }
+//        }
+//        return fkPlayers;
+        // THE OLD WAY \\
     }
 
     @Nullable
     public static BlockPos getBaseCoordinateByPlayer(String name) {
-        for (FKTeam fkTeam : Configs.BASES_CONFIG.config.teams) {
+        for (FKTeam fkTeam : Configs.TEAMS.config.teams) {
             if (fkTeam.getPlayers().stream().anyMatch(name::equals)) {
                 return new BlockPos(fkTeam.getBase().getSquare().getX(), fkTeam.getBase().getSquare().getY(), fkTeam.getBase().getSquare().getZ());
             }
@@ -76,7 +85,7 @@ public class GameUtils {
 
     @Nullable
     public static FKTeam getFKTeamOfPlayerByName(String name) {
-        for (FKTeam fkTeam : Configs.BASES_CONFIG.config.teams) {
+        for (FKTeam fkTeam : Configs.TEAMS.config.teams) {
             if (fkTeam.getPlayers().stream().anyMatch(name::equals)) {
                 return fkTeam;
             }
@@ -84,20 +93,20 @@ public class GameUtils {
         return null;
     }
 
-    public static boolean isInTheSameTeam(String playerName, String anotherPlayerName){
-        for (FKTeam fkTeam : Configs.BASES_CONFIG.config.teams) {
-            if(fkTeam.getPlayers().stream().anyMatch(playerName::equals) && fkTeam.getPlayers().stream().anyMatch(anotherPlayerName::equals))
+    public static boolean isInTheSameTeam(String playerName, String anotherPlayerName) {
+        for (FKTeam fkTeam : Configs.TEAMS.config.teams) {
+            if (fkTeam.getPlayers().stream().anyMatch(playerName::equals) && fkTeam.getPlayers().stream().anyMatch(anotherPlayerName::equals))
                 return true;
         }
         return false;
     }
 
-    public static boolean areMissingPlayers(List<ServerPlayerEntity> onlinePlayers){
+    public static boolean areMissingPlayers(List<ServerPlayerEntity> onlinePlayers) {
         var missingPlayers = GameUtils.ArePlayersReady(onlinePlayers);
         return !missingPlayers.isEmpty();
     }
 
-    public static void sendMissingPlayersMessage(ServerPlayerEntity player, List<ServerPlayerEntity> onlinePlayers){
+    public static void sendMissingPlayersMessage(ServerPlayerEntity player, List<ServerPlayerEntity> onlinePlayers) {
         var missingPlayers = GameUtils.ArePlayersReady(onlinePlayers);
         if (!missingPlayers.isEmpty()) {
             var sb = new StringBuilder();
@@ -118,7 +127,7 @@ public class GameUtils {
         // Is the player close to an enemy base, but not inside
         var isPlayerCloseToAnEnemyBase = false;
 
-        for (FKTeam team : Configs.BASES_CONFIG.config.teams) {
+        for (FKTeam team : Configs.TEAMS.config.teams) {
             var baseSquare = team.getBase().getSquare();
 
             // Is this base the base of the player who break the block ?
@@ -163,34 +172,33 @@ public class GameUtils {
 
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    public static boolean isGameStateRUNNING(){
-        return AllData.FK_GAME_DATA.config.getGameState() == FK.GameState.RUNNING;
+    public static boolean isGameStateRUNNING() {
+        return AllData.FK_GAME_DATA.config.getGameState() == FKMod.GameState.RUNNING;
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    public static boolean isGameStatePAUSE(){
-        return AllData.FK_GAME_DATA.config.getGameState() == FK.GameState.PAUSED;
+    public static boolean isGameStatePAUSE() {
+        return AllData.FK_GAME_DATA.config.getGameState() == FKMod.GameState.PAUSED;
     }
 
-    public static boolean isGameStateNOT_STARTED(){
-        return AllData.FK_GAME_DATA.config.getGameState() == FK.GameState.NOT_STARTED;
+    public static boolean isGameStateNOT_STARTED() {
+        return AllData.FK_GAME_DATA.config.getGameState() == FKMod.GameState.NOT_STARTED;
     }
 
-
-    public static boolean areAssaultEnabled(int currentDay){
-        return currentDay >= Configs.FK_CONFIG.config.dayOfAuthorizationOfTheAssaults;
+    public static boolean areAssaultEnabled(int currentDay) {
+        return currentDay >= Configs.FK.config.dayOfAuthorizationOfTheAssaults;
     }
 
-    public static boolean isNetherEnabled(int currentDay){
-        return currentDay >= Configs.FK_CONFIG.config.dayOfAuthorizationOfTheEntryInTheNether;
+    public static boolean isNetherEnabled(int currentDay) {
+        return currentDay >= Configs.FK.config.dayOfAuthorizationOfTheEntryInTheNether;
     }
 
-    public static boolean isEndEnabled(int currentDay){
-        return currentDay >= Configs.FK_CONFIG.config.dayOfAuthorizationOfTheEntryInTheEnd;
+    public static boolean isEndEnabled(int currentDay) {
+        return currentDay >= Configs.FK.config.dayOfAuthorizationOfTheEntryInTheEnd;
     }
 
-    public static boolean isPvPEnabled(int currentDay){
-        return currentDay >= Configs.FK_CONFIG.config.dayOfAuthorizationOfThePvP;
+    public static boolean isPvPEnabled(int currentDay) {
+        return currentDay >= Configs.FK.config.dayOfAuthorizationOfThePvP;
     }
 
 }

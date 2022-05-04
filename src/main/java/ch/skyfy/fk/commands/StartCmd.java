@@ -1,6 +1,6 @@
 package ch.skyfy.fk.commands;
 
-import ch.skyfy.fk.FK;
+import ch.skyfy.fk.FKMod;
 import ch.skyfy.fk.logic.FKGame;
 import ch.skyfy.fk.logic.data.AllData;
 import ch.skyfy.fk.logic.data.FKGameData;
@@ -52,7 +52,7 @@ public class StartCmd implements Command<ServerCommandSource> {
 
                 source.getServer().getPlayerManager().broadcast(new LiteralText("The game begins !").setStyle(Style.EMPTY.withColor(Formatting.GREEN)), MessageType.CHAT, NIL_UUID);
 
-                fkGameData.setGameState(FK.GameState.RUNNING);
+                fkGameData.setGameState(FKMod.GameState.RUNNING);
 
                 optFKGameRef.get().ifPresent(FKGame::start);
             }

@@ -4,8 +4,8 @@ import net.fabricmc.loader.api.FabricLoader;
 
 import java.nio.file.Path;
 
-import static ch.skyfy.fk.FK.LOGGER;
-import static ch.skyfy.fk.FK.MOD_ID;
+import static ch.skyfy.fk.FKMod.LOGGER;
+import static ch.skyfy.fk.FKMod.MOD_ID;
 
 public class BetterConfig {
 

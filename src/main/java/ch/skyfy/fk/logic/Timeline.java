@@ -1,6 +1,6 @@
 package ch.skyfy.fk.logic;
 
-import ch.skyfy.fk.FK;
+import ch.skyfy.fk.FKMod;
 import ch.skyfy.fk.ScoreboardManager;
 import ch.skyfy.fk.config.core.ConfigUtils;
 import ch.skyfy.fk.events.TimeOfDayUpdatedCallback;
@@ -62,7 +62,7 @@ public class Timeline {
             saveData();
 
         // Update player sidebar
-        for (var fkPlayer : GameUtils.getFkPlayers(server))
+        for (var fkPlayer : GameUtils.getAllConnectedFKPlayers(server.getPlayerManager().getPlayerList()))
             ScoreboardManager.getInstance().updateSidebar(fkPlayer, timelineData.getDay(), timelineData.getMinutes(), timelineData.getSeconds());
 
     }
@@ -75,7 +75,7 @@ public class Timeline {
         try {
             ConfigUtils.save(configFile, type, configData.config);
         } catch (IOException e) {
-            FK.LOGGER.warn("An error occurred while trying to save game data");
+            FKMod.LOGGER.warn("An error occurred while trying to save game data");
             e.printStackTrace();
         }
     }
