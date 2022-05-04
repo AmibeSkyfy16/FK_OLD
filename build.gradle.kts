@@ -10,9 +10,7 @@ version = property("mod_version")!!
 
 repositories {
     mavenCentral()
-    maven("https://maven.bymartrixx.me") {
-
-    }
+    maven("https://maven.bymartrixx.me") {}
 }
 
 dependencies {
