@@ -66,7 +66,6 @@ public class FKMod implements DedicatedServerModInitializer {
     private void onFirstPlayerJoin(ServerPlayerEntity player, MinecraftServer server){
         if(firstJoin)return;
         if(server.getPlayerManager().getPlayerList().size() == 1){
-            System.out.println("Player " + player.getName().asString() + " is the first player on the server");
             firstJoin = true;
 
             final var fkGame = new FKGame(server);
@@ -74,9 +73,6 @@ public class FKMod implements DedicatedServerModInitializer {
 
             if(GameUtils.isGameStateRUNNING())
                 AllData.FK_GAME_DATA.config.setGameState(GameState.PAUSED);
-
-            if(GameUtils.isGameStatePAUSE())
-                fkGame.addPlayerPosIf_PAUSED(player);
 
         }
     }

@@ -36,10 +36,11 @@ public class ResumeCmd implements Command<ServerCommandSource> {
         var source = context.getSource();
         var player = source.getPlayer();
 
-        if (!player.hasPermissionLevel(4)) {
-            player.sendMessage(Text.of("You dont have required privileges to use this command"), false);
-            return 0;
-        }
+        // TODO UNCOMMENT THIS
+//        if (!player.hasPermissionLevel(4)) {
+//            player.sendMessage(Text.of("You dont have required privileges to use this command"), false);
+//            return 0;
+//        }
 
         switch (fkGameData.getGameState()) {
             case NOT_STARTED ->
@@ -48,10 +49,11 @@ public class ResumeCmd implements Command<ServerCommandSource> {
                     player.sendMessage(new LiteralText("The game cannot be resumed because it is running !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
             case PAUSED -> {
 
-                if (GameUtils.areMissingPlayers(source.getServer().getPlayerManager().getPlayerList())) {
-                    GameUtils.sendMissingPlayersMessage(player, source.getServer().getPlayerManager().getPlayerList());
-                    return 0;
-                }
+                // TODO UNCOMMENT
+//                if (GameUtils.areMissingPlayers(source.getServer().getPlayerManager().getPlayerList())) {
+//                    GameUtils.sendMissingPlayersMessage(player, source.getServer().getPlayerManager().getPlayerList());
+//                    return 0;
+//                }
 
                 source.getServer().getPlayerManager().broadcast(new LiteralText("The game has been resumed").setStyle(Style.EMPTY.withColor(Formatting.GREEN)), MessageType.CHAT, NIL_UUID);
 

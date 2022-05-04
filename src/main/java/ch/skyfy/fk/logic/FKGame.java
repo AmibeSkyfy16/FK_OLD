@@ -2,7 +2,6 @@ package ch.skyfy.fk.logic;
 
 import ch.skyfy.fk.ScoreboardManager;
 import ch.skyfy.fk.config.Configs;
-import ch.skyfy.fk.config.data.Cube;
 import ch.skyfy.fk.events.*;
 import me.bymartrixx.playerevents.api.event.PlayerJoinCallback;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
@@ -35,11 +34,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.ObjectInputFilter;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.StreamSupport;
 
 @SuppressWarnings("FieldCanBeLocal")
@@ -49,20 +44,15 @@ public class FKGame {
 
     public Timeline timeline;
 
-    private final NotStartedEvents notStartedEvents;
     private final PauseEvents pauseEvents;
 
     private final FKGameEvents fkGameEvents;
 
-    private final Map<String, Vec3d> playerPositionWhenPaused;
-
     public FKGame(MinecraftServer server) {
         this.server = server;
         this.timeline = new Timeline(server);
-        notStartedEvents = new NotStartedEvents();
         pauseEvents = new PauseEvents();
         fkGameEvents = new FKGameEvents();
-        this.playerPositionWhenPaused = new HashMap<>();
 
         setWorldSpawn();
         registerEvents();
@@ -83,18 +73,13 @@ public class FKGame {
     }
 
     public void pause() {
-        // Records the position of the players. Will prevent them from moving when the game is paused.
-        for (var fkPlayer : GameUtils.getAllConnectedFKPlayers(server.getPlayerManager().getPlayerList()))
-            playerPositionWhenPaused.putIfAbsent(fkPlayer.getUuidAsString(), new Vec3d(fkPlayer.getX(), fkPlayer.getY(), fkPlayer.getZ()));
+
     }
 
     public void resume() {
         // If the timeline wasn't started (in the case of a server restart with gamestate at PAUSE OR RUNNING)
-        if (!timeline.getIsStartedRef().get()) {
+        if (!timeline.getIsStartedRef().get())
             timeline.startTimer();
-        }
-
-        playerPositionWhenPaused.clear();
     }
 
     private void updateTeam(MinecraftServer server, ServerPlayerEntity player) {
@@ -138,20 +123,13 @@ public class FKGame {
         PlayerMoveCallback.EVENT.register(fkGameEvents::cancelPlayersFromMoving);
         PlayerDamageCallback.EVENT.register(fkGameEvents::onPlayerDamage);
         PlayerHungerCallback.EVENT.register(fkGameEvents::onPlayerHungerUpdate);
+        PlayerJoinCallback.EVENT.register(fkGameEvents::teleportPlayerToWaitingRoom);
 
         // Event use when the game state is "pause"
-        PlayerJoinCallback.EVENT.register(pauseEvents::playerJoin);
         EntityMoveCallback.EVENT.register(pauseEvents::stopEntitiesFromMoving);
         TimeOfDayUpdatedCallback.EVENT.register(pauseEvents::cancelTimeOfDayToBeingUpdated);
 
         // Event use when the game state is NOT_STARTED
-        PlayerJoinCallback.EVENT.register(notStartedEvents::teleportPlayerToWaitingRoom);
-    }
-
-    public void addPlayerPosIf_PAUSED(ServerPlayerEntity player){
-        if(GameUtils.isGameStatePAUSE()){
-            playerPositionWhenPaused.putIfAbsent(player.getUuidAsString(), new Vec3d(player.getX(), player.getY(), player.getZ()));
-        }
     }
 
     /**
@@ -416,17 +394,8 @@ public class FKGame {
             }
 
             // Cancel player from moving.
-            if (GameUtils.isGameStatePAUSE()) {
-                for (var entry : playerPositionWhenPaused.entrySet()) {
-                    var fkPlayer = server.getPlayerManager().getPlayer(UUID.fromString(entry.getKey()));
-                    if (fkPlayer != null) { // If fkPlayer is null, this is because it is not connected
-                        var pos = entry.getValue();
-                        var cube = new Cube((short) 1, 3, 3, pos.x, pos.y, pos.z); // The area where the player can move
-                        if (Utils.cancelPlayerFromLeavingACube(cube, player, Optional.empty()))
-                            return ActionResult.FAIL;
-                    }
-                }
-            }
+            if (GameUtils.isGameStatePAUSE())
+                return ActionResult.FAIL;
 
             // Cancel the player from going too far into the map
             if(Utils.cancelPlayerFromLeavingACube(Configs.WORLD_CONFIG.config.worldInfo.getWorldDimension(), player, Optional.empty())){
@@ -453,29 +422,7 @@ public class FKGame {
             }
             return ActionResult.PASS;
         }
-    }
 
-    class PauseEvents {
-
-        private void playerJoin(ServerPlayerEntity player, MinecraftServer server){
-            if(GameUtils.isGameStatePAUSE())
-                playerPositionWhenPaused.putIfAbsent(player.getUuidAsString(), new Vec3d(player.getX(), player.getY(), player.getZ()));
-        }
-
-        private ActionResult stopEntitiesFromMoving(Entity entity, MovementType movementType, Vec3d movement) {
-            if (!GameUtils.isGameStatePAUSE()) return ActionResult.PASS;
-            return ActionResult.FAIL;
-        }
-
-        private ActionResult cancelTimeOfDayToBeingUpdated(long time) {
-            if (!GameUtils.isGameStatePAUSE()) return ActionResult.PASS;
-            return ActionResult.FAIL;
-        }
-
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    class NotStartedEvents {
         private void teleportPlayerToWaitingRoom(ServerPlayerEntity player, MinecraftServer server) {
             if (player.hasPermissionLevel(4)) return;
 
@@ -493,6 +440,21 @@ public class FKGame {
                         player.teleport(serverWorld, spawnLoc.getX(), spawnLoc.getY(), spawnLoc.getZ(), spawnLoc.getYaw(), spawnLoc.getPitch());
                     });
         }
+
+    }
+
+    static class PauseEvents {
+
+        private ActionResult stopEntitiesFromMoving(Entity entity, MovementType movementType, Vec3d movement) {
+            if (!GameUtils.isGameStatePAUSE()) return ActionResult.PASS;
+            return ActionResult.FAIL;
+        }
+
+        private ActionResult cancelTimeOfDayToBeingUpdated(long time) {
+            if (!GameUtils.isGameStatePAUSE()) return ActionResult.PASS;
+            return ActionResult.FAIL;
+        }
+
     }
 
 }

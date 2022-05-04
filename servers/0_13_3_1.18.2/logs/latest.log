@@ -1,5 +1,5 @@
-[07:21:19] [main/INFO]: Loading Minecraft 1.18.2 with Fabric Loader 0.13.3
-[07:21:19] [main/INFO]: Loading 47 mods:
+[10:46:54] [main/INFO]: Loading Minecraft 1.18.2 with Fabric Loader 0.13.3
+[10:46:55] [main/INFO]: Loading 47 mods:
 	- clumps 8.0.0+8
 	- com_velocitypowered_velocity-native 1.1.0-SNAPSHOT via krypton
 	- fabric 0.51.1+1.18.2
@@ -47,57 +47,62 @@
 	- player_events_api 2.2.4 via player_events
 	- starlight 1.0.2+fabric.89b8d9f
 	- worldedit 7.2.10+1742f98
-[07:21:20] [main/INFO]: SpongePowered MIXIN Subsystem Version=0.8.5 Source=file:/C:/Users/colin/Desktop/FK/servers/0_13_3_1.18.2/libraries/net/fabricmc/sponge-mixin/0.11.2+mixin.0.8.5/sponge-mixin-0.11.2+mixin.0.8.5.jar Service=Knot/Fabric Env=SERVER
-[07:21:20] [main/INFO]: Compatibility level set to JAVA_17
-[07:21:20] [main/INFO]: Loaded configuration file for Lithium: 100 options available, 2 override(s) found
-[07:21:20] [main/WARN]: Force-disabling mixin 'alloc.blockstate.StateMixin' as rule 'mixin.alloc.blockstate' (added by mods [ferritecore]) disables it and children
-[07:21:20] [main/WARN]: Force-disabling mixin 'world.player_chunk_tick.ThreadedAnvilChunkStorageMixin' as rule 'mixin.world.player_chunk_tick' (added by mods [krypton]) disables it and children
-[07:21:21] [main/INFO]: fk.mixins.json:ItemInvoker->@Invoker[METHOD_PROXY]::invokeRaycast(Lnet/minecraft/class_1937;Lnet/minecraft/class_1657;Lnet/minecraft/class_3959$class_242;)Lnet/minecraft/class_3965; should be static as its target is
-[07:21:24] [main/INFO]: Compression will use Java 11, encryption will use Java
-[07:21:24] [main/INFO]: Got request to register class com.sk89q.worldedit.fabric.FabricPlatform with WorldEdit [com.sk89q.worldedit.extension.platform.PlatformManager@4961e75c]
-[07:21:24] [main/INFO]: WorldEdit for Fabric (version 7.2.10+1742f98) is loaded
-[07:21:24] [main/INFO]: ALL CONFIG HAVE BEEN LOADED WITH SUCCESS
-[07:21:24] [main/INFO]: ch.skyfy.fk.config.Configs has been loaded
-[07:21:24] [main/INFO]: ALL CONFIG HAVE BEEN LOADED WITH SUCCESS
-[07:21:24] [main/INFO]: Krypton is now accelerating your Minecraft server's networking stack ?
-[07:21:24] [main/INFO]: Environment: authHost='https://authserver.mojang.com', accountsHost='https://api.mojang.com', sessionHost='https://sessionserver.mojang.com', servicesHost='https://api.minecraftservices.com', name='PROD'
-[07:21:25] [main/INFO]: [fabric-registry-sync] Loaded registry data [file 1/4]
-[07:21:25] [main/INFO]: Registering commands with com.sk89q.worldedit.fabric.FabricPlatform
-[07:21:25] [main/WARN]: Ambiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
-[07:21:25] [main/WARN]: Ambiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
-[07:21:25] [main/WARN]: Ambiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
-[07:21:25] [main/WARN]: Ambiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
-[07:21:25] [main/WARN]: Ambiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
-[07:21:26] [Worker-Main-28/INFO]: Loaded 7 recipes
-[07:21:26] [Worker-Main-28/INFO]: Loaded 1141 advancements
-[07:21:26] [main/INFO]: Applied 0 biome modifications to 0 of 61 new biomes in 1.969 ms
-[07:21:26] [Server thread/INFO]: Starting minecraft server version 1.18.2
-[07:21:26] [Server thread/INFO]: Loading properties
-[07:21:26] [Server thread/INFO]: Default game type: SURVIVAL
-[07:21:26] [Server thread/INFO]: Generating keypair
-[07:21:26] [Server thread/INFO]: Starting Minecraft server on *:25565
-[07:21:27] [Server thread/INFO]: Using default channel type
-[07:21:27] [Server thread/INFO]: Preparing level "Optimized_World"
-[07:21:27] [Server thread/INFO]: Preparing start region for dimension minecraft:overworld
-[07:21:27] [Worker-Main-5/INFO]: Preparing spawn area: 0%
-[07:21:27] [Worker-Main-5/INFO]: Preparing spawn area: 0%
-[07:21:28] [Worker-Main-13/INFO]: Preparing spawn area: 4%
-[07:21:28] [Worker-Main-9/INFO]: Preparing spawn area: 84%
-[07:21:28] [Server thread/INFO]: Time elapsed: 1649 ms
-[07:21:28] [Server thread/INFO]: Done (1.751s)! For help, type "help"
-[07:21:44] [User Authenticator #1/INFO]: UUID of player Skyfy16 is ebb5c153-3f6f-4fb6-9062-20ac564e7490
-[07:21:45] [Server thread/INFO]: Skyfy16[/127.0.0.1:54792] logged in with entity id 1 at (-2.0864568219825967, -33.0, 1.5005657389592035)
-[07:21:45] [Server thread/INFO]: Skyfy16 joined the game
-[07:21:45] [Server thread/WARN]: @Redirect conflict. Skipping lithium.mixins.json:alloc.entity_tracker.EntityTrackerMixin->@Redirect::useFasterCollection()Ljava/util/Set; from mod lithium with priority 1000, already redirected by krypton.mixins.json:shared.network.microopt.TacsTrackedEntityMixin->@Redirect::construct$useFastutil()Ljava/util/Set; from mod krypton with priority 1000
-[07:21:45] [Server thread/INFO]: [STDOUT]: Player Skyfy16 is the first player on the server
-[07:21:53] [Server thread/INFO]: [Skyfy16: Set own game mode to Survival Mode]
-[07:21:54] [Server thread/INFO]: [Skyfy16: Set own game mode to Creative Mode]
-[07:22:14] [Server thread/INFO]: Made Skyfy16 no longer a server operator
-[07:22:15] [Server thread/WARN]: Skyfy16 moved too quickly! -23.0,0.0,2.0
-[07:22:15] [Server thread/WARN]: Skyfy16 moved too quickly! -23.0,0.0,2.0
-[07:22:27] [Server thread/INFO]: Made Skyfy16 a server operator
-[07:22:30] [Server thread/INFO]: The game begins !
-[07:22:34] [Server thread/INFO]: Made Skyfy16 no longer a server operator
-[07:22:42] [Server thread/WARN]: Skyfy16 moved too quickly! 94.35576973647564,0.0,-1.0
-[07:22:55] [Server thread/WARN]: Skyfy16 moved too quickly! 52.16630332582143,0.0,-1.0
-[07:22:55] [Server thread/WARN]: Skyfy16 moved too quickly! 52.16630332582143,0.0,-1.0
+[10:46:55] [main/INFO]: SpongePowered MIXIN Subsystem Version=0.8.5 Source=file:/C:/Users/colin/Desktop/FK/servers/0_13_3_1.18.2/libraries/net/fabricmc/sponge-mixin/0.11.2+mixin.0.8.5/sponge-mixin-0.11.2+mixin.0.8.5.jar Service=Knot/Fabric Env=SERVER
+[10:46:55] [main/INFO]: Compatibility level set to JAVA_17
+[10:46:55] [main/INFO]: Loaded configuration file for Lithium: 100 options available, 2 override(s) found
+[10:46:55] [main/WARN]: Force-disabling mixin 'alloc.blockstate.StateMixin' as rule 'mixin.alloc.blockstate' (added by mods [ferritecore]) disables it and children
+[10:46:55] [main/WARN]: Force-disabling mixin 'world.player_chunk_tick.ThreadedAnvilChunkStorageMixin' as rule 'mixin.world.player_chunk_tick' (added by mods [krypton]) disables it and children
+[10:46:56] [main/INFO]: fk.mixins.json:ItemInvoker->@Invoker[METHOD_PROXY]::invokeRaycast(Lnet/minecraft/class_1937;Lnet/minecraft/class_1657;Lnet/minecraft/class_3959$class_242;)Lnet/minecraft/class_3965; should be static as its target is
+[10:46:59] [main/INFO]: Compression will use Java 11, encryption will use Java
+[10:47:00] [main/INFO]: Got request to register class com.sk89q.worldedit.fabric.FabricPlatform with WorldEdit [com.sk89q.worldedit.extension.platform.PlatformManager@23d0a0]
+[10:47:00] [main/INFO]: WorldEdit for Fabric (version 7.2.10+1742f98) is loaded
+[10:47:00] [main/INFO]: ALL CONFIG HAVE BEEN LOADED WITH SUCCESS
+[10:47:00] [main/INFO]: ch.skyfy.fk.config.Configs has been loaded
+[10:47:00] [main/INFO]: ALL CONFIG HAVE BEEN LOADED WITH SUCCESS
+[10:47:00] [main/INFO]: Krypton is now accelerating your Minecraft server's networking stack ?
+[10:47:00] [main/INFO]: Environment: authHost='https://authserver.mojang.com', accountsHost='https://api.mojang.com', sessionHost='https://sessionserver.mojang.com', servicesHost='https://api.minecraftservices.com', name='PROD'
+[10:47:00] [main/INFO]: [fabric-registry-sync] Loaded registry data [file 1/4]
+[10:47:01] [main/INFO]: Registering commands with com.sk89q.worldedit.fabric.FabricPlatform
+[10:47:01] [main/WARN]: Ambiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[10:47:01] [main/WARN]: Ambiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
+[10:47:01] [main/WARN]: Ambiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[10:47:01] [main/WARN]: Ambiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[10:47:01] [main/WARN]: Ambiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[10:47:01] [Worker-Main-25/INFO]: Loaded 7 recipes
+[10:47:01] [Worker-Main-25/INFO]: Loaded 1141 advancements
+[10:47:02] [main/INFO]: Applied 0 biome modifications to 0 of 61 new biomes in 1.650 ms
+[10:47:02] [Server thread/INFO]: Starting minecraft server version 1.18.2
+[10:47:02] [Server thread/INFO]: Loading properties
+[10:47:02] [Server thread/INFO]: Default game type: SURVIVAL
+[10:47:02] [Server thread/INFO]: Generating keypair
+[10:47:02] [Server thread/INFO]: Starting Minecraft server on *:25565
+[10:47:02] [Server thread/INFO]: Using default channel type
+[10:47:02] [Server thread/INFO]: Preparing level "Optimized_World"
+[10:47:02] [Server thread/INFO]: Preparing start region for dimension minecraft:overworld
+[10:47:03] [Worker-Main-10/INFO]: Preparing spawn area: 0%
+[10:47:03] [Worker-Main-10/INFO]: Preparing spawn area: 0%
+[10:47:03] [Worker-Main-8/INFO]: Preparing spawn area: 1%
+[10:47:04] [Worker-Main-18/INFO]: Preparing spawn area: 48%
+[10:47:04] [Server thread/INFO]: Time elapsed: 1815 ms
+[10:47:04] [Server thread/INFO]: Done (1.932s)! For help, type "help"
+[10:47:08] [User Authenticator #1/INFO]: UUID of player Skyfy16 is ebb5c153-3f6f-4fb6-9062-20ac564e7490
+[10:47:09] [Server thread/INFO]: Skyfy16[/127.0.0.1:62877] logged in with entity id 1 at (-2.8975754761762276, -33.0, 1.6033877717918104)
+[10:47:09] [Server thread/INFO]: Skyfy16 joined the game
+[10:47:09] [Server thread/WARN]: @Redirect conflict. Skipping lithium.mixins.json:alloc.entity_tracker.EntityTrackerMixin->@Redirect::useFasterCollection()Ljava/util/Set; from mod lithium with priority 1000, already redirected by krypton.mixins.json:shared.network.microopt.TacsTrackedEntityMixin->@Redirect::construct$useFastutil()Ljava/util/Set; from mod krypton with priority 1000
+[10:48:03] [Server thread/INFO]: Incorrect argument for command
+[10:48:03] [Server thread/INFO]: deop  skyfy16<--[HERE]
+[10:48:07] [Server thread/INFO]: Unknown or incomplete command, see below for error
+[10:48:07] [Server thread/INFO]: <--[HERE]
+[10:48:11] [Server thread/INFO]: Made Skyfy16 no longer a server operator
+[10:48:15] [Server thread/INFO]: Skyfy16 lost connection: Disconnected
+[10:48:15] [Server thread/INFO]: Skyfy16 left the game
+[10:49:23] [User Authenticator #2/INFO]: UUID of player Skyfy16 is ebb5c153-3f6f-4fb6-9062-20ac564e7490
+[10:49:23] [Server thread/INFO]: Skyfy16[/127.0.0.1:62929] logged in with entity id 2 at (1.618789023375515, -33.0, 1.8350419573595798)
+[10:49:23] [Server thread/INFO]: Skyfy16 joined the game
+[10:49:35] [Server thread/INFO]: The game begins !
+[10:49:38] [Server thread/INFO]: The game has been paused
+[10:49:40] [Server thread/INFO]: Skyfy16 lost connection: Disconnected
+[10:49:40] [Server thread/INFO]: Skyfy16 left the game
+[10:49:42] [User Authenticator #3/INFO]: UUID of player Skyfy16 is ebb5c153-3f6f-4fb6-9062-20ac564e7490
+[10:49:42] [Server thread/INFO]: Skyfy16[/127.0.0.1:62938] logged in with entity id 3 at (-0.16592038165646752, -33.0, 0.2143243174264182)
+[10:49:42] [Server thread/INFO]: Skyfy16 joined the game

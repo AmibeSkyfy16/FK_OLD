@@ -48,23 +48,25 @@ public class Timeline {
 
     private void updateTime(long timeOfDay){
 
+        // TODO TICK PROBLEM -> second timer
+
         var previousMinutes = timelineData.getMinutes();
 
-        timelineData.setMinutes((int) (timeOfDay / 1200d));
-        timelineData.setSeconds((int) (((timeOfDay / 1200d) - timelineData.getMinutes()) * 60));
+        var remainingTime = timeOfDay % 24_000;
 
-        if(timeOfDay >= 24000) {
-            server.getOverworld().setTimeOfDay(0L);
+        timelineData.setMinutes((int) (remainingTime / 1200d));
+        timelineData.setSeconds((int) (((remainingTime / 1200d) - timelineData.getMinutes()) * 60));
+
+        if(remainingTime == 0)
             timelineData.setDay(timelineData.getDay() + 1);
-        }
 
-        if(previousMinutes != timelineData.getMinutes())
-            saveData();
+        // TODO
+//        if(previousMinutes != timelineData.getMinutes())
+//            saveData();
 
         // Update player sidebar
         for (var fkPlayer : GameUtils.getAllConnectedFKPlayers(server.getPlayerManager().getPlayerList()))
             ScoreboardManager.getInstance().updateSidebar(fkPlayer, timelineData.getDay(), timelineData.getMinutes(), timelineData.getSeconds());
-
     }
 
     @SuppressWarnings("UnstableApiUsage")

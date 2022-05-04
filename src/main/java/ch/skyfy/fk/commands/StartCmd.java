@@ -35,10 +35,11 @@ public class StartCmd implements Command<ServerCommandSource> {
         var source = context.getSource();
         var player = source.getPlayer();
 
-        if (!player.hasPermissionLevel(4)) {
-            player.sendMessage(Text.of("You dont have required privileges to use this command"), false);
-            return 0;
-        }
+        // TODO UNCOMMENT THIS
+//        if (!player.hasPermissionLevel(4)) {
+//            player.sendMessage(Text.of("You dont have required privileges to use this command"), false);
+//            return 0;
+//        }
 
         switch (fkGameData.getGameState()){
             case PAUSED -> player.sendMessage(new LiteralText("The game cannot be started because it is paused !").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);

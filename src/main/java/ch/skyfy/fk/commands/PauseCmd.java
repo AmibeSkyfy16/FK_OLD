@@ -1,5 +1,6 @@
 package ch.skyfy.fk.commands;
 
+import ch.skyfy.fk.FKMod;
 import ch.skyfy.fk.logic.FKGame;
 import ch.skyfy.fk.logic.data.AllData;
 import ch.skyfy.fk.logic.data.FKGameData;
@@ -28,16 +29,18 @@ public class PauseCmd implements Command<ServerCommandSource> {
         this.optFKGameRef = optFKGameRef;
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public int run(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
 
         var source = context.getSource();
         var player = source.getPlayer();
 
-        if (!player.hasPermissionLevel(4)) {
-            player.sendMessage(Text.of("You dont have required privileges to use this command"), false);
-            return 0;
-        }
+        // TODO UNCOMMENT THIS
+//        if (!player.hasPermissionLevel(4)) {
+//            player.sendMessage(Text.of("You dont have required privileges to use this command"), false);
+//            return 0;
+//        }
 
         switch (fkGameData.getGameState()) {
             case NOT_STARTED ->
@@ -48,7 +51,7 @@ public class PauseCmd implements Command<ServerCommandSource> {
 
                 source.getServer().getPlayerManager().broadcast(Text.of("The game has been paused"), MessageType.CHAT, NIL_UUID);
 
-
+                AllData.FK_GAME_DATA.config.setGameState(FKMod.GameState.PAUSED);
                 optFKGameRef.get().ifPresent(FKGame::pause);
 
             }
